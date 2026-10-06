@@ -1,0 +1,55 @@
+services:
+  mysqldb:
+    image: mysql:8.0
+    container_name: guardianes-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_secure_password}
+      MYSQL_DATABASE: ${DB_NAME:-guardianes_planeta_db}
+      MYSQL_USER: ${DB_USER:-guardian_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-guardian_secret_pass}
+    ports:
+      - "${DB_PORT:-3306}:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - guardianes-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-root_secure_password}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: guardianes-back
+    restart: unless-stopped
+    depends_on:
+      mysqldb:
+        condition: service_healthy
+    environment:
+      PORT: ${SERVER_PORT:-8080}
+      DB_HOST: mysqldb
+      DB_PORT: 3306
+      DB_NAME: ${DB_NAME:-guardianes_planeta_db}
+      DB_USER: ${DB_USER:-guardian_user}
+      DB_PASSWORD: ${DB_PASSWORD:-guardian_secret_pass}
+      JPA_DDL_AUTO: ${JPA_DDL_AUTO:-update}
+      SHOW_SQL: ${SHOW_SQL:-true}
+      JWT_SECRET: ${JWT_SECRET:-404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
+      JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS:-86400000}
+    ports:
+      - "${SERVER_PORT:-8080}:8080"
+    networks:
+      - guardianes-network
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  guardianes-network:
+    driver: bridge
