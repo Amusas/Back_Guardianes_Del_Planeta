@@ -4,6 +4,11 @@ import com.guardianesdelplaneta.domain.model.Streak;
 import com.guardianesdelplaneta.domain.port.in.GetStreakUseCase;
 import com.guardianesdelplaneta.infrastructure.adapter.in.rest.dto.StreakResponseDto;
 import com.guardianesdelplaneta.infrastructure.adapter.in.rest.mapper.StreakRestMapper;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -18,6 +23,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/children/me/streak")
+@Tag(name = "Rachas", description = "Operaciones relacionadas con las rachas")
 public class StreakController {
 
     private final GetStreakUseCase getStreakUseCase;
@@ -28,6 +34,18 @@ public class StreakController {
         this.streakRestMapper = streakRestMapper;
     }
 
+    @Operation(summary = "Obtener racha actual")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Operación exitosa"),
+            @ApiResponse(responseCode = "201", description = "Creado"),
+            @ApiResponse(responseCode = "400", description = "Petición incorrecta"),
+            @ApiResponse(responseCode = "401", description = "No autorizado"),
+            @ApiResponse(responseCode = "403", description = "Prohibido"),
+            @ApiResponse(responseCode = "404", description = "No encontrado"),
+            @ApiResponse(responseCode = "409", description = "Conflicto"),
+            @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+    })
+    @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasRole('CHILD')")
     @GetMapping
     public ResponseEntity<StreakResponseDto> getCurrentStreak() {
@@ -37,6 +55,18 @@ public class StreakController {
                 .orElse(ResponseEntity.noContent().build());
     }
 
+    @Operation(summary = "Obtener historial de rachas")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Operación exitosa"),
+            @ApiResponse(responseCode = "201", description = "Creado"),
+            @ApiResponse(responseCode = "400", description = "Petición incorrecta"),
+            @ApiResponse(responseCode = "401", description = "No autorizado"),
+            @ApiResponse(responseCode = "403", description = "Prohibido"),
+            @ApiResponse(responseCode = "404", description = "No encontrado"),
+            @ApiResponse(responseCode = "409", description = "Conflicto"),
+            @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+    })
+    @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasRole('CHILD')")
     @GetMapping("/history")
     public ResponseEntity<List<StreakResponseDto>> getStreakHistory() {

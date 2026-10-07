@@ -1,6 +1,7 @@
 package com.guardianesdelplaneta.infrastructure.adapter.in.rest.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -10,11 +11,17 @@ import java.util.List;
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record ErrorResponseDto(
+        @Schema(description = "Código de estado HTTP", example = "404")
         int statusCode,
+        @Schema(description = "Tipo de error HTTP", example = "Not Found")
         String error,
+        @Schema(description = "Mensaje detallado del error", example = "Recurso no encontrado")
         String message,
+        @Schema(description = "Ruta de la API donde ocurrió el error", example = "/api/v1/ecosistemas/1")
         String path,
+        @Schema(description = "Fecha y hora en que ocurrió el error", example = "2023-10-27T10:00:00")
         LocalDateTime timestamp,
+        @Schema(description = "Lista de detalles adicionales del error", example = "[\"El ID debe ser mayor a 0\"]")
         List<String> details
 ) {
 
