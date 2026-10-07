@@ -10,4 +10,6 @@ import java.util.List;
 public interface RewardRepository extends JpaRepository<RewardEntity, Long> {
 
     List<RewardEntity> findByIsActiveTrue();
+    List<RewardEntity> findByRequiredLevelIdLessThanEqual(Long levelId);
 }
+

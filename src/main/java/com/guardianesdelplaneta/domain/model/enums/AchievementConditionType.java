@@ -1,9 +1,14 @@
 package com.guardianesdelplaneta.domain.model.enums;
 
 public enum AchievementConditionType {
+    FIRST_ACTIVITY,
     FIRST_LESSON,
-    XP_TOTAL,
-    STREAK_DAYS,
-    ECOSYSTEMS_COMPLETED,
-    PERFECT_SCORE
+    ACTIVITY_COUNT,
+    LESSON_COUNT,
+    ECOSYSTEM_COUNT,
+    XP_REACHED,
+    LEVEL_REACHED,
+    STREAK_REACHED,
+    ECOSYSTEM_COMPLETED,
+    SPECIAL_CHALLENGE_COMPLETED
 }

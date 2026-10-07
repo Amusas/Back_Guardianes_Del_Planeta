@@ -25,7 +25,16 @@ public class StreakPersistenceAdapter implements StreakPersistencePort {
     }
 
     @Override
+    public java.util.List<Streak> findByChildId(Long childId) {
+        return repository.findByChildId(childId).stream()
+                .map(mapper::toDomain)
+                .collect(java.util.stream.Collectors.toList());
+    }
+
+    @Override
     public Streak save(Streak streak) {
         return mapper.toDomain(repository.save(mapper.toEntity(streak)));
     }
 }
+
+

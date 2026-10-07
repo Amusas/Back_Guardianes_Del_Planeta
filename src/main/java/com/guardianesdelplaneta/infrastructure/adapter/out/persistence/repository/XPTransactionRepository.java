@@ -10,4 +10,7 @@ import java.util.List;
 public interface XPTransactionRepository extends JpaRepository<XPTransactionEntity, Long> {
 
     List<XPTransactionEntity> findByChildIdOrderByCreatedAtDesc(Long childId);
+    boolean existsByChildIdAndTypeAndReferenceId(Long childId, com.guardianesdelplaneta.domain.model.enums.XPTransactionType type, Long referenceId);
 }
+
+

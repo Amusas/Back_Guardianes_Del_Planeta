@@ -23,3 +23,5 @@ public class RewardPersistenceAdapter implements RewardPersistencePort {
         return repository.findByRequiredLevelIdLessThanEqual(levelId).stream().map(mapper::toDomain).toList();
     }
 }
+
+

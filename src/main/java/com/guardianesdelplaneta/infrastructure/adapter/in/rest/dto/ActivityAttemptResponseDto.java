@@ -15,6 +15,8 @@ public record ActivityAttemptResponseDto(
         Boolean lessonCompleted,
         Boolean ecosystemCompleted,
         Integer streakCount,
-        List<String> xpEvents
+        List<String> xpEvents,
+        List<AchievementResponseDto> unlockedAchievements
 ) {
 }
+

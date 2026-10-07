@@ -35,6 +35,8 @@ class ActivityAttemptServiceTest {
     @Mock private ChildRewardPersistencePort childRewardPort;
     @Mock private LessonPersistencePort lessonPort;
 
+    @Mock private AchievementEvaluator achievementEvaluator;
+    @Mock private com.guardianesdelplaneta.infrastructure.adapter.in.rest.mapper.AchievementRestMapper achievementRestMapper;
     private ActivityEvaluator evaluator;
     private ActivityAttemptService service;
     private ObjectMapper mapper;
@@ -45,8 +47,10 @@ class ActivityAttemptServiceTest {
         evaluator = new ActivityEvaluator(mapper);
         service = new ActivityAttemptService(
                 childProfilePort, activityPort, attemptPort, xpTransactionPort,
-                levelPort, progressPort, streakPort, rewardPort, childRewardPort, lessonPort, evaluator
+                levelPort, progressPort, streakPort, rewardPort, childRewardPort, lessonPort, evaluator, achievementEvaluator, achievementRestMapper
         );
+        java.util.List<com.guardianesdelplaneta.domain.model.Achievement> emptyAchievements = java.util.Collections.emptyList();
+        org.mockito.Mockito.lenient().when(achievementEvaluator.evaluateAchievements(any(), anyInt(), anyInt(), anyInt(), anyInt())).thenReturn(emptyAchievements);
     }
 
     @Test
@@ -79,3 +83,4 @@ class ActivityAttemptServiceTest {
         verify(childProfilePort, times(1)).save(any());
     }
 }
+

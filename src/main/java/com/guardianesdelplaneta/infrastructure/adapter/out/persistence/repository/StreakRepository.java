@@ -12,8 +12,10 @@ import java.util.Optional;
 public interface StreakRepository extends JpaRepository<StreakEntity, Long> {
 
     Optional<StreakEntity> findByChildIdAndActivityDate(Long childId, LocalDate activityDate);
+    java.util.List<StreakEntity> findByChildId(Long childId);
 
     List<StreakEntity> findByChildIdOrderByActivityDateDesc(Long childId);
 
     boolean existsByChildIdAndActivityDate(Long childId, LocalDate activityDate);
 }
+

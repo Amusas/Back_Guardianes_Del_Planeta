@@ -35,6 +35,8 @@ public class ActivityAttemptService implements SubmitActivityAttemptUseCase {
     private final ChildRewardPersistencePort childRewardPort;
     private final LessonPersistencePort lessonPort;
     private final ActivityEvaluator evaluator;
+    private final AchievementEvaluator achievementEvaluator;
+    private final com.guardianesdelplaneta.infrastructure.adapter.in.rest.mapper.AchievementRestMapper achievementRestMapper;
 
     public ActivityAttemptService(
             ChildProfilePersistencePort childProfilePort,
@@ -47,7 +49,9 @@ public class ActivityAttemptService implements SubmitActivityAttemptUseCase {
             RewardPersistencePort rewardPort,
             ChildRewardPersistencePort childRewardPort,
             LessonPersistencePort lessonPort,
-            ActivityEvaluator evaluator) {
+            ActivityEvaluator evaluator,
+            AchievementEvaluator achievementEvaluator,
+            com.guardianesdelplaneta.infrastructure.adapter.in.rest.mapper.AchievementRestMapper achievementRestMapper) {
         this.childProfilePort = childProfilePort;
         this.activityPort = activityPort;
         this.attemptPort = attemptPort;
@@ -59,15 +63,17 @@ public class ActivityAttemptService implements SubmitActivityAttemptUseCase {
         this.childRewardPort = childRewardPort;
         this.lessonPort = lessonPort;
         this.evaluator = evaluator;
+        this.achievementEvaluator = achievementEvaluator;
+        this.achievementRestMapper = achievementRestMapper;
     }
 
     @Override
     @Transactional
     public ActivityAttemptResponseDto submitAttempt(Long userId, Long activityId, ActivityAttemptRequestDto request) {
-        logger.info("Iniciando evaluación de intento para la actividad: {} por el usuario: {}", activityId, userId);
+        logger.info("Iniciando evaluaciÃƒÂ³n de intento para la actividad: {} por el usuario: {}", activityId, userId);
 
         ChildProfile child = childProfilePort.findByUserId(userId)
-                .orElseThrow(() -> new DomainException("Perfil de niño no encontrado para el usuario: " + userId));
+                .orElseThrow(() -> new DomainException("Perfil de niÃƒÂ±o no encontrado para el usuario: " + userId));
 
         Activity activity = activityPort.findById(activityId)
                 .orElseThrow(() -> new DomainException("Actividad no encontrada: " + activityId));
@@ -141,7 +147,7 @@ public class ActivityAttemptService implements SubmitActivityAttemptUseCase {
         while (nextLvl.isPresent() && child.getTotalXp() >= nextLvl.get().getRequiredXp()) {
             child.setLevelId(nextLvl.get().getId());
             levelUp = true;
-            logger.info("El niño {} ha subido al nivel {}", child.getId(), nextLvl.get().getLevelNumber());
+            logger.info("El niÃƒÂ±o {} ha subido al nivel {}", child.getId(), nextLvl.get().getLevelNumber());
             
             // Rewards
             List<Reward> rewards = rewardPort.findByRequiredLevelIdLessThanEqual(child.getLevelId());
@@ -172,6 +178,9 @@ public class ActivityAttemptService implements SubmitActivityAttemptUseCase {
         attempt.setAttemptedAt(LocalDateTime.now());
         attemptPort.save(attempt);
 
+        List<Achievement> unlockedAchievements = achievementEvaluator.evaluateAchievements(child, (int)attemptCount + 1, 0, 0, 0); // Simplified values for now
+        var achievementDtos = unlockedAchievements.stream().map(achievementRestMapper::toResponseDto).collect(java.util.stream.Collectors.toList());
+        
         return new ActivityAttemptResponseDto(
                 isCorrect,
                 attemptNumber,
@@ -184,14 +193,15 @@ public class ActivityAttemptService implements SubmitActivityAttemptUseCase {
                 false,
                 false,
                 child.getStreakCount(),
-                xpEvents
+                xpEvents,
+                achievementDtos
         );
     }
 
     private void saveXPTransaction(Long childId, XPTransactionType type, Long refId, int amount, String desc) {
         XPTransaction tx = new XPTransaction();
         tx.setChildId(childId);
-        tx.setTransactionType(type);
+        tx.setType(type);
         tx.setAmount(amount);
         tx.setReferenceId(refId);
         tx.setDescription(desc);
@@ -199,3 +209,6 @@ public class ActivityAttemptService implements SubmitActivityAttemptUseCase {
         xpTransactionPort.save(tx);
     }
 }
+
+
+
