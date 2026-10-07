@@ -22,4 +22,11 @@ public class ChildProfilePersistenceAdapter implements ChildProfilePersistencePo
     public Optional<ChildProfile> findByUserId(Long userId) {
         return repository.findByUserId(userId).map(mapper::toDomain);
     }
+
+    @Override
+    public ChildProfile save(ChildProfile childProfile) {
+        var entity = mapper.toEntity(childProfile);
+        var saved = repository.save(entity);
+        return mapper.toDomain(saved);
+    }
 }

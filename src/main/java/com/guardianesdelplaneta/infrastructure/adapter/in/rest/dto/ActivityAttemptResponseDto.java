@@ -1,15 +1,20 @@
 package com.guardianesdelplaneta.infrastructure.adapter.in.rest.dto;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public record ActivityAttemptResponseDto(
-        Long id,
-        Long childId,
-        Long activityId,
-        Integer attemptNumber,
-        String responseJson,
         Boolean isCorrect,
+        Integer attemptNumber,
         Integer xpAwarded,
-        LocalDateTime attemptedAt
+        Integer totalXp,
+        Long currentLevel,
+        Boolean levelUp,
+        Long previousLevel,
+        Boolean activityCompleted,
+        Boolean lessonCompleted,
+        Boolean ecosystemCompleted,
+        Integer streakCount,
+        List<String> xpEvents
 ) {
 }
