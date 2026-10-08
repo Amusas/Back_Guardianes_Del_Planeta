@@ -1,6 +1,8 @@
 package com.guardianesdelplaneta.infrastructure.adapter.in.rest.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.guardianesdelplaneta.domain.exception.InvalidCredentialsException;
+import com.guardianesdelplaneta.domain.exception.UserBlockedException;
 import com.guardianesdelplaneta.domain.model.User;
 import com.guardianesdelplaneta.domain.model.enums.UserRole;
 import com.guardianesdelplaneta.domain.model.enums.UserStatus;
@@ -108,7 +110,7 @@ class AuthControllerTest {
     }
 
     @Test
-    @DisplayName("POST /auth/v1/user debe retornar 400 Bad Request cuando la petición no es válida")
+    @DisplayName("POST /auth/v1/user debe retornar 400 Bad Request cuando la peticion no es valida")
     void shouldReturn400WhenValidationFails() throws Exception {
         UserRegisterRequestDto invalidRequest = new UserRegisterRequestDto("", "12", null);
 
@@ -116,5 +118,44 @@ class AuthControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidRequest)))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("POST /auth/v1/login debe retornar 400 Bad Request cuando el body es invalido")
+    void loginShouldReturn400WhenValidationFails() throws Exception {
+        UserLoginRequestDto invalidRequest = new UserLoginRequestDto("", "");
+
+        mockMvc.perform(post("/auth/v1/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(invalidRequest)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("POST /auth/v1/login debe retornar 401 Unauthorized cuando las credenciales son invalidas")
+    void loginShouldReturn401WhenInvalidCredentials() throws Exception {
+        UserLoginRequestDto request = new UserLoginRequestDto("guardian_test", "wrongpass");
+
+        when(authenticateUserUseCase.authenticate("guardian_test", "wrongpass"))
+                .thenThrow(new InvalidCredentialsException());
+
+        mockMvc.perform(post("/auth/v1/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("POST /auth/v1/login debe retornar 403 Forbidden cuando el usuario esta bloqueado")
+    void loginShouldReturn403WhenUserBlocked() throws Exception {
+        UserLoginRequestDto request = new UserLoginRequestDto("blocked_user", "password123");
+
+        when(authenticateUserUseCase.authenticate("blocked_user", "password123"))
+                .thenThrow(new UserBlockedException("blocked_user"));
+
+        mockMvc.perform(post("/auth/v1/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isForbidden());
     }
 }
