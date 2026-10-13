@@ -103,83 +103,62 @@ public class DataSeeder implements CommandLineRunner {
                         1,
                         "OSO_ANDINO",
                         List.of(
-                                new LessonInfo("Árboles nativos", "Aprende sobre especies emblemáticas como el roble andino y la palma de cera.", 1, 50),
-                                new LessonInfo("Mamíferos andinos", "Conoce la fauna de montaña, como el oso de anteojos y la danta de páramo.", 2, 50),
-                                new LessonInfo("Cuidado del sotobosque", "Descubre la importancia del musgo, helechos y microhábitats de suelo.", 3, 50)
+                                new LessonInfo(
+                                        "Bienvenidos al Bosque Andino",
+                                        "El Bosque Andino es un ecosistema que se encuentra en las montañas de los Andes. Allí hay árboles, plantas, animales y fuentes de agua que necesitan condiciones especiales para vivir. En este lugar, la neblina, la humedad y las temperaturas frescas ayudan a mantener la vida. ¡Hoy comienza tu aventura para descubrirlo y protegerlo!",
+                                        1,
+                                        20
+                                ),
+                                new LessonInfo(
+                                        "Exploradores de la Biodiversidad",
+                                        "La biodiversidad es la variedad de seres vivos que habitan un lugar. En el Bosque Andino encontramos árboles, musgos, helechos, insectos, aves y muchos otros organismos. Cada uno cumple una función importante: algunas plantas producen alimento, ciertos animales transportan semillas y otros ayudan a descomponer los restos naturales. Cuanta más biodiversidad saludable exista, más conexiones tendrá este ecosistema.",
+                                        2,
+                                        25
+                                ),
+                                new LessonInfo(
+                                        "Los Habitantes del Bosque",
+                                        "Los animales del Bosque Andino tienen adaptaciones que les permiten encontrar alimento, refugio y pareja. El oso andino, por ejemplo, consume frutos y plantas, y puede ayudar a dispersar semillas. Las aves pueden transportar semillas a otros lugares, mientras que los insectos polinizadores ayudan a muchas plantas a reproducirse. Proteger a los animales también significa conservar los lugares donde encuentran lo que necesitan para vivir.",
+                                        3,
+                                        30
+                                ),
+                                new LessonInfo(
+                                        "El Viaje del Agua",
+                                        "El agua viaja constantemente por la naturaleza mediante el ciclo del agua. Se evapora, forma nubes, cae como lluvia y puede infiltrarse en el suelo o alimentar quebradas y ríos. Los bosques ayudan a regular el agua porque sus hojas, raíces y suelos favorecen su retención y circulación. Cuando destruimos la vegetación o contaminamos las fuentes hídricas, ponemos en riesgo tanto a los animales como a las comunidades humanas.",
+                                        4,
+                                        35
+                                ),
+                                new LessonInfo(
+                                        "La Red de la Vida",
+                                        "En el bosque, los seres vivos están conectados mediante relaciones de alimentación, refugio y reproducción. Las plantas producen su propio alimento usando la luz solar; los herbívoros comen plantas y algunos depredadores se alimentan de otros animales. Los hongos y muchos microorganismos descomponen restos de seres vivos y devuelven nutrientes al suelo. Si una especie desaparece, otras pueden verse afectadas porque forman parte de una misma red ecológica.",
+                                        5,
+                                        40
+                                ),
+                                new LessonInfo(
+                                        "Los Guardianes del Suelo",
+                                        "Aunque no siempre lo vemos, el suelo está lleno de vida. Las lombrices, los hongos, las bacterias y otros organismos ayudan a descomponer hojas y ramas, reciclar nutrientes y mantener la fertilidad. Las raíces sujetan la tierra y la vegetación reduce el impacto directo de la lluvia. La tala, las quemas y la erosión pueden degradar el suelo, dificultando que nuevas plantas crezcan y que el bosque se regenere.",
+                                        6,
+                                        45
+                                ),
+                                new LessonInfo(
+                                        "Amenazas al Bosque Andino",
+                                        "El Bosque Andino enfrenta amenazas como la deforestación, los incendios, la contaminación y la expansión de las ciudades y los cultivos. Cuando un bosque se divide en pequeños fragmentos, muchos animales tienen dificultades para encontrar alimento, reproducirse o desplazarse. Estas alteraciones también pueden afectar el agua y el clima local. Para proteger el ecosistema debemos identificar las causas de los problemas y comprender cómo se relacionan entre sí.",
+                                        7,
+                                        50
+                                ),
+                                new LessonInfo(
+                                        "Misión: Salvar el Bosque Andino",
+                                        "¡Llegó el desafío final, Guardián del Planeta! Imagina que una zona del Bosque Andino está perdiendo árboles, sus quebradas tienen residuos y los animales están perdiendo sus refugios. Para ayudarla, debes proponer un plan que incluya restaurar la vegetación con especies nativas, evitar la contaminación del agua, proteger los hábitats y trabajar con la comunidad. Recuerda que las soluciones deben considerar las conexiones entre plantas, animales, suelo y agua. ¡Ahora tienes el conocimiento para convertirte en un verdadero protector del bosque!",
+                                        8,
+                                        60
+                                )
                         )
                 ),
-                new EcosystemData(
-                        "PARAMO",
-                        "Páramo",
-                        "Conservación del agua y fábrica natural de ríos. Criterio de desbloqueo: Completar Bosque Andino (Lección 2) + Nivel 1.",
-                        1,
-                        "FRAILEJON_GUANE",
-                        List.of(
-                                new LessonInfo("El ciclo del agua en la niebla", "Cómo la niebla paramera se transforma en agua potable.", 1, 50),
-                                new LessonInfo("Función del frailejón", "Estructura esponjosa del frailejón y retención de humedad.", 2, 50),
-                                new LessonInfo("Protección de nacederos", "Cuidado de lagunas glaciares y ríos nacientes.", 3, 50)
-                        )
-                ),
-                new EcosystemData(
-                        "OCEANO",
-                        "Océano",
-                        "Contaminación marina y microplásticos. Criterio de desbloqueo: Completar Páramo + Nivel 2.",
-                        2,
-                        "TORTUGA_MARINA",
-                        List.of(
-                                new LessonInfo("Arrecifes de coral", "Estructuras vivas marinas y su rol protegiendo costas.", 1, 50),
-                                new LessonInfo("Impacto del plástico", "Peligro de redes fantasma y degradación a microplásticos.", 2, 50),
-                                new LessonInfo("Vida marina protegida", "Tortugas, cetáceos y manglares como refugio pelágico.", 3, 50)
-                        )
-                ),
-                new EcosystemData(
-                        "SELVA_AMAZONICA",
-                        "Selva Amazónica",
-                        "Deforestación y pulmón del planeta. Criterio de desbloqueo: Completar Océano + Nivel 3.",
-                        3,
-                        "ANACONDA_VERDE",
-                        List.of(
-                                new LessonInfo("La masa forestal", "Dosel arbóreo, regulación climática y lluvias voladoras.", 1, 50),
-                                new LessonInfo("Cadenas tróficas selváticas", "Depredadores tope y equilibrio de presas.", 2, 50),
-                                new LessonInfo("Amenazas de la tala", "Impacto de la ganadería extensiva e incendios forestales.", 3, 50)
-                        )
-                ),
-                new EcosystemData(
-                        "MANGLAR",
-                        "Manglar",
-                        "Protección costera y cunas de vida acuática. Criterio de desbloqueo: Completar Selva Amazónica + Nivel 3.",
-                        3,
-                        "CANGREJO",
-                        List.of(
-                                new LessonInfo("Raíces en agua salada", "Mangle rojo, raíces zancudas y filtración de sedimentos.", 1, 50),
-                                new LessonInfo("Barreras contra tormentas", "Disipación de oleaje extremo y huracanes costeros.", 2, 50),
-                                new LessonInfo("Fauna de estuario", "Moluscos, peces juveniles y aves migratorias marinas.", 3, 50)
-                        )
-                ),
-                new EcosystemData(
-                        "BOSQUE_SECO_TROPICAL",
-                        "Bosque Seco Tropical",
-                        "Adaptación a la sequía y especies endémicas. Criterio de desbloqueo: Completar Manglar + Nivel 4.",
-                        4,
-                        "IGUANA_VERDE",
-                        List.of(
-                                new LessonInfo("Flora decidua", "Caída de hojas para evitar pérdida de humedad en temporada seca.", 1, 50),
-                                new LessonInfo("Conservación del suelo seco", "Suelos calcáreos y retención de nutrientes escasos.", 2, 50),
-                                new LessonInfo("Estrategias de adaptación", "Fauna con hábitos crepusculares y tolerancia térmica.", 3, 50)
-                        )
-                ),
-                new EcosystemData(
-                        "LLANOS_SABANA",
-                        "Llanos y Sabana",
-                        "Humedales estacionales y fauna de pradera. Criterio de desbloqueo: Completar Bosque Seco + Nivel 5.",
-                        5,
-                        "CHIGUIRO",
-                        List.of(
-                                new LessonInfo("Dinámica de sequía e inundación", "Régimen bimodal de esteros y sabanas inundables.", 1, 50),
-                                new LessonInfo("Aves migratorias", "Corredor aéreo de garzas, corocoras y patos silvestres.", 2, 50),
-                                new LessonInfo("Coexistencia con la fauna", "Conservación de chigüiros, osos hormigueros y venados.", 3, 50)
-                        )
-                )
+                new EcosystemData("PARAMO", "Páramo", "Conservación del agua y fábrica natural de ríos.", 1, "FRAILEJON_GUANE", List.of()),
+                new EcosystemData("OCEANO", "Océano", "Contaminación marina y microplásticos.", 2, "TORTUGA_MARINA", List.of()),
+                new EcosystemData("SELVA_AMAZONICA", "Selva Amazónica", "Deforestación y pulmón del planeta.", 3, "ANACONDA_VERDE", List.of()),
+                new EcosystemData("MANGLAR", "Manglar", "Protección costera y cunas de vida acuática.", 3, "CANGREJO", List.of()),
+                new EcosystemData("BOSQUE_SECO_TROPICAL", "Bosque Seco Tropical", "Adaptación a la sequía y especies endémicas.", 4, "IGUANA_VERDE", List.of()),
+                new EcosystemData("LLANOS_SABANA", "Llanos y Sabana", "Humedales estacionales y fauna de pradera.", 5, "CHIGUIRO", List.of())
         );
 
         for (EcosystemData ecoData : ecosystemList) {
@@ -194,35 +173,38 @@ public class DataSeeder implements CommandLineRunner {
                             .isActive(true)
                             .build()));
 
-            // Actualizar si ya existía sin nivel o atributos
             if (ecoEntity.getRequiredLevel() == null) {
                 ecoEntity.setRequiredLevel(requiredLevel);
                 ecoEntity.setMascotKey(ecoData.mascotKey());
                 ecosystemRepository.save(ecoEntity);
             }
 
-            // Sembrar lecciones si no existen
-            List<LessonEntity> existingLessons = lessonRepository.findByEcosystemIdOrderByOrderIndexAsc(ecoEntity.getId());
-            if (existingLessons.isEmpty()) {
-                for (LessonInfo lessonInfo : ecoData.lessons()) {
-                    LessonEntity lesson = lessonRepository.save(LessonEntity.builder()
-                            .ecosystem(ecoEntity)
-                            .title(lessonInfo.title())
-                            .content(lessonInfo.content())
-                            .orderIndex(lessonInfo.orderIndex())
-                            .xpReward(lessonInfo.xpReward())
-                            .isActive(true)
-                            .build());
+            // Solo sembrar lecciones si existen en la definición (por ahora Bosque Andino)
+            if (!ecoData.lessons().isEmpty()) {
+                List<LessonEntity> currentLessons = lessonRepository.findByEcosystemIdOrderByOrderIndexAsc(ecoEntity.getId());
+                if (currentLessons.size() != ecoData.lessons().size()) {
+                    for (LessonInfo lessonInfo : ecoData.lessons()) {
+                        boolean exists = currentLessons.stream().anyMatch(l -> l.getOrderIndex().equals(lessonInfo.orderIndex()));
+                        if (!exists) {
+                            LessonEntity lesson = lessonRepository.save(LessonEntity.builder()
+                                    .ecosystem(ecoEntity)
+                                    .title(lessonInfo.title())
+                                    .content(lessonInfo.content())
+                                    .orderIndex(lessonInfo.orderIndex())
+                                    .xpReward(lessonInfo.xpReward())
+                                    .isActive(true)
+                                    .build());
 
-                    // Actividad interactiva por defecto para la lección
-                    activityRepository.save(ActivityEntity.builder()
-                            .lesson(lesson)
-                            .type(ActivityType.MULTIPLE_CHOICE)
-                            .title("Pregunta clave: " + lessonInfo.title())
-                            .configurationJson("{\"question\":\"¿Cuál es la importancia ambiental de este tema?\",\"options\":[\"Opción A: Destrucción sin control\",\"Opción B: Protección y equilibrio de la vida\",\"Opción C: Ninguna relevancia\"],\"correctOption\":1}")
-                            .xpReward(10)
-                            .orderIndex(1)
-                            .build());
+                            activityRepository.save(ActivityEntity.builder()
+                                    .lesson(lesson)
+                                    .type(ActivityType.MULTIPLE_CHOICE)
+                                    .title("Actividad: " + lessonInfo.title())
+                                    .configurationJson("{\"question\":\"¿Qué acción protege este elemento del bosque?\",\"options\":[\"Cuidar y no arrojar basura\",\"Destruir la vegetación\",\"Contaminar el agua\"],\"correctOption\":0}")
+                                    .xpReward(10)
+                                    .orderIndex(1)
+                                    .build());
+                        }
+                    }
                 }
             }
         }
