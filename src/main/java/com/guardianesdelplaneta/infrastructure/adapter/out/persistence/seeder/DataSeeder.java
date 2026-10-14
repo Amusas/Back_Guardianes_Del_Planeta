@@ -267,7 +267,63 @@ public class DataSeeder implements CommandLineRunner {
                                 )
                         )
                 ),
-                new EcosystemData("SELVA_AMAZONICA", "Selva Amazónica", "Deforestación y pulmón del planeta.", 3, "ANACONDA_VERDE", List.of()),
+                new EcosystemData(
+                        "SELVA_AMAZONICA",
+                        "Selva Amazónica",
+                        "Deforestación y pulmón del planeta. Criterio de desbloqueo: Nivel 3.",
+                        3,
+                        "ANACONDA_VERDE",
+                        List.of(
+                                new LessonInfo(
+                                        "Bienvenidos a la Amazonía Colombiana",
+                                        "La Amazonía colombiana es una vasta región de selva tropical cruzada por caudalosos ríos. En este territorio verde conviven pueblos indígenas ancestrales y la mayor variedad de fauna y flora del mundo, desempeñando un papel clave en la regulación del clima y las lluvias de todo el continente.",
+                                        1,
+                                        20
+                                ),
+                                new LessonInfo(
+                                        "El Reino de los Árboles Gigantes",
+                                        "En la selva, gigantescos árboles como la ceiba y el caucho pueden superar los 40 metros de altura. Sus copas forman un dosel continuo donde habitan monos, tucanes, ranas arborícolas y orquídeas, creando múltiples pisos de vida y refugio según la altura.",
+                                        2,
+                                        25
+                                ),
+                                new LessonInfo(
+                                        "La Anaconda Verde: Gigante de los Ríos",
+                                        "La anaconda verde es la serpiente más pesada del mundo y una nadadora excepcional de caños, pantanos y ríos amazónicos. Descubre sus adaptaciones anatómicas: ojos y fosas nasales en la parte superior de la cabeza para acechar sumergida y su rol como regulador de poblaciones en el agua.",
+                                        3,
+                                        30
+                                ),
+                                new LessonInfo(
+                                        "El Viaje del Agua por la Selva",
+                                        "Los árboles de la selva liberan millones de litros de vapor de agua a la atmósfera mediante evapotranspiración, creando los llamados 'ríos voladores': enormes masas de nubes que llevan lluvias vitales a otras regiones de Colombia y Sudamérica.",
+                                        4,
+                                        35
+                                ),
+                                new LessonInfo(
+                                        "La Red Secreta de la Selva",
+                                        "En el Amazonas las relaciones tróficas son fascinantes e intrincadas: desde hongos e insectos que reciclan materia orgánica en el suelo selvático, peces como el pirarucú y pirañas en los ríos, hasta jaguares y aves rapaces como el águila harpía en lo más alto de la cadena.",
+                                        5,
+                                        40
+                                ),
+                                new LessonInfo(
+                                        "Los Guardianes de las Semillas",
+                                        "Muchos animales amazónicos son dispersores esenciales: monos churucos, tapires, murciélagos frugívoros e incluso peces que comen frutos caídos al agua. Sin ellos, los árboles nativos no podrían propagarse ni la selva regenerarse tras una perturbación.",
+                                        6,
+                                        45
+                                ),
+                                new LessonInfo(
+                                        "Cuando la Selva Está en Peligro",
+                                        "La selva amazónica sufre por la deforestación provocada por la ganadería extensiva, los incendios provocados, la tala ilegal y la contaminación de ríos por minería. La pérdida de masa boscosa fragmenta hábitats y altera el ciclo del agua global.",
+                                        7,
+                                        50
+                                ),
+                                new LessonInfo(
+                                        "Misión: Salvar la Amazonía Colombiana",
+                                        "¡Conviértete en guardián de la selva! Diseña un plan comunitario y ambiental para proteger la Amazonía: apoyar la reforestación con semillas nativas, frenar el consumo de productos que causan tala ilegal, promover reservas forestales y valorar los saberes de los pueblos originarios.",
+                                        8,
+                                        60
+                                )
+                        )
+                ),
                 new EcosystemData("MANGLAR", "Manglar", "Protección costera y cunas de vida acuática.", 3, "CANGREJO", List.of()),
                 new EcosystemData("BOSQUE_SECO_TROPICAL", "Bosque Seco Tropical", "Adaptación a la sequía y especies endémicas.", 4, "IGUANA_VERDE", List.of()),
                 new EcosystemData("LLANOS_SABANA", "Llanos y Sabana", "Humedales estacionales y fauna de pradera.", 5, "CHIGUIRO", List.of())
