@@ -324,7 +324,63 @@ public class DataSeeder implements CommandLineRunner {
                                 )
                         )
                 ),
-                new EcosystemData("MANGLAR", "Manglar", "Protección costera y cunas de vida acuática.", 3, "CANGREJO", List.of()),
+                new EcosystemData(
+                        "MANGLAR",
+                        "Manglar",
+                        "Protección costera y cunas de vida acuática. Criterio de desbloqueo: Nivel 3.",
+                        3,
+                        "CANGREJO",
+                        List.of(
+                                new LessonInfo(
+                                        "Bienvenidos al Reino del Manglar",
+                                        "El manglar es un ecosistema costero único donde la tierra firme se encuentra con el mar. En Colombia los encontramos tanto en el litoral Caribe como en el Pacífico. Este ambiente anfibio sirve de refugio y sala cuna para innumerables especies marinas y terrestres.",
+                                        1,
+                                        20
+                                ),
+                                new LessonInfo(
+                                        "Árboles con Raíces Extraordinarias",
+                                        "Los mangles, como el mangle rojo y el mangle negro, tienen raíces zancudas y pneumatóforos que respiran fuera del fango y filtran el exceso de sal del agua marina. Sus intrincadas ramas submarinas crean laberintos protectores para peces pequeños.",
+                                        2,
+                                        25
+                                ),
+                                new LessonInfo(
+                                        "El Cangrejo: Pequeño Guardián del Manglar",
+                                        "Los cangrejos violinistas y azules son obreros incansables del manglar: excavan galerías que oxigenan el suelo lodoso y se alimentan de hojas caídas, acelerando la descomposición de nutrientes que alimentan a toda la comunidad acuática.",
+                                        3,
+                                        30
+                                ),
+                                new LessonInfo(
+                                        "El Encuentro del Río con el Mar",
+                                        "En los estuarios, el agua dulce que baja de las montañas se mezcla con el agua salada que entra con las mareas, formando agua salobre. Esta mezcla rica en sedimentos y minerales genera uno de los entornos más productivos del planeta.",
+                                        4,
+                                        35
+                                ),
+                                new LessonInfo(
+                                        "La Gran Red Alimentaria del Manglar",
+                                        "La vida en el manglar está interconectada: desde bacterias y hongos que procesan la hojarasca, moluscos y camarones que se alimentan del detrito, hasta peces juveniles, garzas, pelícanos y nutrias que cazan en sus aguas tranquilas.",
+                                        5,
+                                        40
+                                ),
+                                new LessonInfo(
+                                        "El Escudo Natural de la Costa",
+                                        "Los densos bosques de manglar actúan como amortiguadores naturales contra tormentas, huracanes y marejadas ciclónicas, reteniendo los sedimentos para evitar la erosión de las costas y protegiendo a las comunidades humanas costeras.",
+                                        6,
+                                        45
+                                ),
+                                new LessonInfo(
+                                        "Cuando el Manglar Está en Peligro",
+                                        "La tala indiscriminada de madera, el desarrollo urbano desmedido en las playas, la contaminación por aguas residuales y la instalación de granjas acuícolas sin regulación amenazan con destruir estos valiosos bosques salados.",
+                                        7,
+                                        50
+                                ),
+                                new LessonInfo(
+                                        "Misión: Salvar el Manglar Colombiano",
+                                        "¡Conviértete en protector costero! Elabora una propuesta para la restauración comunitaria de los manglares: siembra de propágulos de mangle, limpieza de residuos plásticos atrapados en las raíces y campañas de sensibilización en las poblaciones pesqueras.",
+                                        8,
+                                        60
+                                )
+                        )
+                ),
                 new EcosystemData("BOSQUE_SECO_TROPICAL", "Bosque Seco Tropical", "Adaptación a la sequía y especies endémicas.", 4, "IGUANA_VERDE", List.of()),
                 new EcosystemData("LLANOS_SABANA", "Llanos y Sabana", "Humedales estacionales y fauna de pradera.", 5, "CHIGUIRO", List.of())
         );
