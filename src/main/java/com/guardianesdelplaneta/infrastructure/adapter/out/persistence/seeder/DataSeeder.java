@@ -153,7 +153,63 @@ public class DataSeeder implements CommandLineRunner {
                                 )
                         )
                 ),
-                new EcosystemData("PARAMO", "Páramo", "Conservación del agua y fábrica natural de ríos.", 1, "FRAILEJON_GUANE", List.of()),
+                new EcosystemData(
+                        "PARAMO",
+                        "Páramo",
+                        "Conservación del agua y fábrica natural de ríos.",
+                        1,
+                        "FRAILEJON_GUANE",
+                        List.of(
+                                new LessonInfo(
+                                        "Exploradores del Páramo Colombiano",
+                                        "El páramo es un ecosistema de alta montaña que encontramos en Colombia, especialmente en las cordilleras de los Andes. Sus temperaturas son bajas, hay neblina frecuente y pueden alternarse momentos de sol, lluvia y frío. Allí viven frailejones, pajonales, pequeños animales y muchas otras especies adaptadas a estas condiciones. Los páramos son fundamentales para el país porque sus suelos y humedales almacenan agua y ayudan a regular su circulación.",
+                                        1,
+                                        20
+                                ),
+                                new LessonInfo(
+                                        "El Ciclo del Agua en la Niebla",
+                                        "En los páramos colombianos, la neblina y las nubes bajas son parte importante del ambiente. Las gotas de agua pueden quedar atrapadas en la vegetación y después caer al suelo, mientras la lluvia también alimenta las quebradas y los humedales. Parte del agua se infiltra y queda almacenada en los suelos, desde donde puede desplazarse lentamente. Así, el agua sigue su recorrido por el ecosistema y contribuye al abastecimiento de ríos y comunidades. ¡La niebla también forma parte de esta aventura!",
+                                        2,
+                                        25
+                                ),
+                                new LessonInfo(
+                                        "La Misión del Frailejón",
+                                        "El frailejón es una de las plantas más representativas de los páramos colombianos. Sus hojas, cubiertas de pequeños pelos, ayudan a protegerlo del frío y pueden retener gotas de agua. Sus hojas muertas también se acumulan alrededor del tallo y contribuyen a conservar la humedad. Los frailejones forman parte de un ecosistema que regula el agua, pero necesitan años para crecer. Por eso, arrancarlos o pisotearlos puede causar daños difíciles de reparar.",
+                                        3,
+                                        30
+                                ),
+                                new LessonInfo(
+                                        "Guardianes de los Nacederos",
+                                        "Los nacederos son lugares donde el agua subterránea llega a la superficie y comienza a alimentar pequeños cursos de agua. En los páramos, los suelos húmedos, las turberas y la vegetación ayudan a regular el movimiento del agua que puede llegar a quebradas y ríos. Si contaminamos estos lugares, removemos la vegetación o alteramos el suelo, podemos perjudicar la calidad y la disponibilidad del agua. Proteger los nacederos significa conservar su entorno, evitar los residuos y respetar las zonas sensibles.",
+                                        4,
+                                        35
+                                ),
+                                new LessonInfo(
+                                        "La Vida en un Clima Extremo",
+                                        "En el páramo, las plantas y los animales deben soportar temperaturas cambiantes, vientos fuertes y alta exposición al sol. Algunas plantas crecen cerca del suelo o tienen hojas especiales que ayudan a protegerlas del frío. Los animales buscan refugio, alimento y lugares adecuados para reproducirse. Estas adaptaciones les permiten sobrevivir en condiciones difíciles. Cuando el hábitat cambia demasiado rápido, las especies pueden perder las condiciones que necesitan para vivir.",
+                                        5,
+                                        40
+                                ),
+                                new LessonInfo(
+                                        "Una Red de Vida en las Alturas",
+                                        "En el páramo, los seres vivos dependen unos de otros y de las condiciones del ambiente. Los insectos pueden polinizar flores, las aves pueden transportar semillas y los organismos del suelo ayudan a descomponer la materia orgánica. El agua y los nutrientes también conectan los distintos componentes del ecosistema. Si desaparecen ciertas plantas o se deterioran los humedales, pueden cambiar los recursos disponibles para otras especies. Comprender estas relaciones nos ayuda a reconocer por qué proteger una sola parte del páramo no siempre es suficiente.",
+                                        6,
+                                        45
+                                ),
+                                new LessonInfo(
+                                        "Amenazas al Páramo Colombiano",
+                                        "Los páramos colombianos enfrentan amenazas como las quemas, la expansión agrícola y ganadera, algunas actividades mineras, la contaminación y el cambio climático. Estas presiones pueden degradar los suelos, modificar los humedales y afectar las especies que viven allí. Cuando el suelo pierde su estructura y su capacidad para retener agua, el ecosistema puede tardar mucho tiempo en recuperarse. Para conservarlo debemos identificar las causas del daño y buscar alternativas que permitan proteger la naturaleza y el bienestar de las comunidades.",
+                                        7,
+                                        50
+                                ),
+                                new LessonInfo(
+                                        "Misión: Proteger la Fábrica de Agua",
+                                        "¡El páramo necesita tu ayuda! Imagina que una zona tiene basura cerca de un nacedero, vegetación dañada y señales de erosión. Debes diseñar un plan de protección: identificar las causas del problema, evitar nuevas alteraciones, conservar la vegetación nativa y solicitar apoyo a las autoridades ambientales y a la comunidad. También debes explicar cómo la neblina, los frailejones, los humedales y los suelos participan en la regulación del agua. Tu misión es proponer soluciones que protejan todo el ecosistema, no solamente una planta o una fuente de agua.",
+                                        8,
+                                        60
+                                )
+                        )
+                ),
                 new EcosystemData("OCEANO", "Océano", "Contaminación marina y microplásticos.", 2, "TORTUGA_MARINA", List.of()),
                 new EcosystemData("SELVA_AMAZONICA", "Selva Amazónica", "Deforestación y pulmón del planeta.", 3, "ANACONDA_VERDE", List.of()),
                 new EcosystemData("MANGLAR", "Manglar", "Protección costera y cunas de vida acuática.", 3, "CANGREJO", List.of()),
