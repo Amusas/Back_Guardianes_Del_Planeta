@@ -22,4 +22,11 @@ public class ActivityPersistenceAdapter implements ActivityPersistencePort {
     public Optional<Activity> findById(Long id) {
         return repository.findById(id).map(mapper::toDomain);
     }
+
+    @Override
+    public java.util.List<Activity> findByLessonIdOrderByOrderIndexAsc(Long lessonId) {
+        return repository.findByLessonIdOrderByOrderIndexAsc(lessonId).stream()
+                .map(mapper::toDomain)
+                .toList();
+    }
 }
