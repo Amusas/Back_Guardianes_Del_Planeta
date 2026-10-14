@@ -57,6 +57,7 @@ public class DataSeeder implements CommandLineRunner {
         log.info("Verificando e inicializando datos semilla...");
         Map<Integer, LevelEntity> levels = seedLevels();
         seedEcosystemsAndLessons(levels);
+        seedWelcomeLessonActivities();
         seedAchievements();
         seedRewards(levels);
         log.info("Inicialización de datos semilla completada.");
@@ -544,6 +545,85 @@ public class DataSeeder implements CommandLineRunner {
                 }
             }
         }
+    }
+
+    private void seedWelcomeLessonActivities() {
+        ecosystemRepository.findByCode("BOSQUE_ANDINO").ifPresent(ecosystem -> {
+            lessonRepository.findByEcosystemIdOrderByOrderIndexAsc(ecosystem.getId()).stream()
+                    .filter(l -> l.getOrderIndex() == 1)
+                    .findFirst()
+                    .ifPresent(lesson -> {
+                        List<ActivityEntity> currentActivities = activityRepository.findByLessonIdOrderByOrderIndexAsc(lesson.getId());
+                        if (currentActivities.size() < 6) {
+                            activityRepository.deleteAll(currentActivities);
+
+                            List<ActivityEntity> activities = List.of(
+                                    // 1. MULTIPLE_CHOICE — ¿Dónde vive el oso de anteojos?
+                                    ActivityEntity.builder()
+                                            .lesson(lesson)
+                                            .type(ActivityType.MULTIPLE_CHOICE)
+                                            .title("¿Dónde vive el oso de anteojos?")
+                                            .configurationJson("{\"question\":\"¿Dónde vive el oso de anteojos?\",\"options\":[\"En el desierto caliente\",\"En el bosque andino y de niebla\",\"En el fondo del mar\"],\"correctAnswer\":\"En el bosque andino y de niebla\",\"correctOption\":1,\"difficulty\":\"Muy fácil\"}")
+                                            .xpReward(10)
+                                            .orderIndex(1)
+                                            .build(),
+
+                                    // 2. TRUE_FALSE — El bosque andino es hogar de muchos animales
+                                    ActivityEntity.builder()
+                                            .lesson(lesson)
+                                            .type(ActivityType.TRUE_FALSE)
+                                            .title("El bosque andino es hogar de muchos animales")
+                                            .configurationJson("{\"statement\":\"El bosque andino es hogar de muchos animales, aves e insectos.\",\"options\":[\"Verdadero\",\"Falso\"],\"correctAnswer\":\"Verdadero\",\"correctOption\":0,\"difficulty\":\"Muy fácil\"}")
+                                            .xpReward(10)
+                                            .orderIndex(2)
+                                            .build(),
+
+                                    // 3. IDENTIFICATION — ¿Cuál es el colibrí?
+                                    ActivityEntity.builder()
+                                            .lesson(lesson)
+                                            .type(ActivityType.IDENTIFICATION)
+                                            .title("¿Cuál es el colibrí?")
+                                            .configurationJson("{\"prompt\":\"Selecciona el colibrí entre las siguientes aves:\",\"options\":[{\"id\":\"tucan\",\"name\":\"Tucán\",\"visualKey\":\"IMG_TUCAN\"},{\"id\":\"colibri\",\"name\":\"Colibrí\",\"visualKey\":\"IMG_COLIBRI\"},{\"id\":\"loro\",\"name\":\"Loro\",\"visualKey\":\"IMG_LORO\"}],\"correctAnswer\":\"colibri\",\"correctOption\":1,\"difficulty\":\"Muy fácil\"}")
+                                            .xpReward(10)
+                                            .orderIndex(3)
+                                            .build(),
+
+                                    // 4. CLASSIFICATION — ¿Quiénes viven en el bosque?
+                                    ActivityEntity.builder()
+                                            .lesson(lesson)
+                                            .type(ActivityType.CLASSIFICATION)
+                                            .title("¿Quiénes viven en el bosque?")
+                                            .configurationJson("{\"instructions\":\"Separa los seres vivos del bosque de los objetos que no son vivos:\",\"categories\":[{\"id\":\"vivos\",\"name\":\"Seres vivos del bosque\"},{\"id\":\"no_vivos\",\"name\":\"Objetos no vivos\"}],\"items\":[{\"id\":\"oso\",\"name\":\"Oso de anteojos\"},{\"id\":\"palma\",\"name\":\"Palma de cera\"},{\"id\":\"botella\",\"name\":\"Botella plástica\"},{\"id\":\"llanta\",\"name\":\"Llanta vieja\"}],\"correctAnswers\":{\"oso\":\"vivos\",\"palma\":\"vivos\",\"botella\":\"no_vivos\",\"llanta\":\"no_vivos\"},\"difficulty\":\"Muy fácil\"}")
+                                            .xpReward(10)
+                                            .orderIndex(4)
+                                            .build(),
+
+                                    // 5. ORDERING — El camino del agua
+                                    ActivityEntity.builder()
+                                            .lesson(lesson)
+                                            .type(ActivityType.ORDERING)
+                                            .title("El camino del agua")
+                                            .configurationJson("{\"instructions\":\"Organiza los tres pasos sobre cómo el agua de la lluvia llega a una quebrada:\",\"steps\":[\"La lluvia cae sobre las hojas y el musgo\",\"El agua se infiltra y viaja por el suelo\",\"El agua brota limpia en la quebrada\"],\"correctSequence\":[0,1,2],\"difficulty\":\"Muy fácil\"}")
+                                            .xpReward(10)
+                                            .orderIndex(5)
+                                            .build(),
+
+                                    // 6. DRAG_AND_DROP — Construye tu bosque andino
+                                    ActivityEntity.builder()
+                                            .lesson(lesson)
+                                            .type(ActivityType.DRAG_AND_DROP)
+                                            .title("Construye tu bosque andino")
+                                            .configurationJson("{\"instructions\":\"Ubica cada elemento en su lugar correcto:\",\"targets\":[{\"zone\":\"bosque\",\"name\":\"El Bosque\"},{\"zone\":\"agua\",\"name\":\"La Quebrada\"},{\"zone\":\"rama\",\"name\":\"Las Ramas\"}],\"elements\":[{\"id\":\"arbol\",\"name\":\"Árbol nativo\"},{\"id\":\"pez\",\"name\":\"Pez de montaña\"},{\"id\":\"ave\",\"name\":\"Pájaro andino\"}],\"correctAnswers\":{\"arbol\":\"bosque\",\"pez\":\"agua\",\"ave\":\"rama\"},\"difficulty\":\"Muy fácil\"}")
+                                            .xpReward(10)
+                                            .orderIndex(6)
+                                            .build()
+                            );
+
+                            activityRepository.saveAll(activities);
+                            log.info("Sembradas exitosamente las 6 actividades de 'Bienvenidos al Bosque Andino'.");
+                        }
+                    });
+        });
     }
 
     private void seedAchievements() {
