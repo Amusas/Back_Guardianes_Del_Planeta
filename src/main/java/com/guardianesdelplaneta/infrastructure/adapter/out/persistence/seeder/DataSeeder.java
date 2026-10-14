@@ -210,7 +210,63 @@ public class DataSeeder implements CommandLineRunner {
                                 )
                         )
                 ),
-                new EcosystemData("OCEANO", "Océano", "Contaminación marina y microplásticos.", 2, "TORTUGA_MARINA", List.of()),
+                new EcosystemData(
+                        "OCEANO",
+                        "Océano",
+                        "Contaminación marina y microplásticos. Criterio de desbloqueo: Nivel 2.",
+                        2,
+                        "TORTUGA_MARINA",
+                        List.of(
+                                new LessonInfo(
+                                        "Bienvenidos a los Dos Océanos de Colombia",
+                                        "Colombia es un país privilegiado al contar con costas en el Mar Caribe y el Océano Pacífico. En estas aguas cálidas y profundas habitan miles de especies marinas. Aprenderemos sobre las diferencias entre ambos litorales, sus corrientes marinas y por qué son vitales para el equilibrio climático del planeta.",
+                                        1,
+                                        20
+                                ),
+                                new LessonInfo(
+                                        "El Reino de los Arrecifes de Coral",
+                                        "Los arrecifes de coral son conocidos como las selvas del mar por su inmensa biodiversidad. Aunque parecen rocas o plantas, los corales son pequeños animales que forman estructuras coloniales donde peces, moluscos y crustáceos encuentran refugio, alimento y zonas de cría.",
+                                        2,
+                                        25
+                                ),
+                                new LessonInfo(
+                                        "Algas Ondulantes y Praderas Marinas",
+                                        "Las praderas de pastos marinos y las algas son los productores primarios del océano. Capturan carbono de la atmósfera, producen oxígeno y sirven de alimento para tortugas, manatíes y peces juveniles, manteniendo el agua limpia y reduciendo la fuerza del oleaje costero.",
+                                        3,
+                                        30
+                                ),
+                                new LessonInfo(
+                                        "La Gran Aventura de la Tortuga Marina",
+                                        "Las tortugas marinas recorren miles de kilómetros a lo largo de su vida, pero siempre regresan a las playas donde nacieron para desovar. Descubre sus adaptaciones anatómicas para nadar en mar abierto, su respiración pulmonar y los desafíos que enfrentan los neonatos al llegar al océano.",
+                                        4,
+                                        35
+                                ),
+                                new LessonInfo(
+                                        "El Viaje de la Energía Marina",
+                                        "La energía en el océano viaja a través de cadenas tróficas marinas: desde el fitoplancton microscópico y el zooplancton, pasando por peces herbívoros y bancos de sardinas, hasta grandes depredadores tope como tiburones, delfines y ballenas jorobadas.",
+                                        5,
+                                        40
+                                ),
+                                new LessonInfo(
+                                        "Misterios de las Aguas Profundas",
+                                        "Bajo la superficie marina, donde la luz del sol no puede penetrar, se encuentra la zona abisal. Los seres vivos aquí han desarrollado adaptaciones sorprendentes como la bioluminiscencia, cuerpos gelatinosos y tolerancia a presiones aplastantes y bajas temperaturas.",
+                                        6,
+                                        45
+                                ),
+                                new LessonInfo(
+                                        "Amenazas Bajo las Olas",
+                                        "Nuestros océanos enfrentan graves problemas como la acumulación de plásticos de un solo uso, los microplásticos ingeridos por la fauna, el calentamiento del agua que blanquea los corales, la acidificación marina y la sobrepesca de especies vulnerables.",
+                                        7,
+                                        50
+                                ),
+                                new LessonInfo(
+                                        "Misión: Guardianes de los Océanos Colombianos",
+                                        "¡Llegó la hora de actuar, Guardián del Mar! Diseña un plan de rescate marino para proteger las costas colombianas: reducir el uso de plásticos en las ciudades, apoyar áreas marinas protegidas, participar en jornadas de limpieza de playas y promover el consumo responsable de recursos acuáticos.",
+                                        8,
+                                        60
+                                )
+                        )
+                ),
                 new EcosystemData("SELVA_AMAZONICA", "Selva Amazónica", "Deforestación y pulmón del planeta.", 3, "ANACONDA_VERDE", List.of()),
                 new EcosystemData("MANGLAR", "Manglar", "Protección costera y cunas de vida acuática.", 3, "CANGREJO", List.of()),
                 new EcosystemData("BOSQUE_SECO_TROPICAL", "Bosque Seco Tropical", "Adaptación a la sequía y especies endémicas.", 4, "IGUANA_VERDE", List.of()),
