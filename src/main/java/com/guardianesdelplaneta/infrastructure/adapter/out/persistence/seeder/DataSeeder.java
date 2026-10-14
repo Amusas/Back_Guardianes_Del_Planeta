@@ -381,8 +381,120 @@ public class DataSeeder implements CommandLineRunner {
                                 )
                         )
                 ),
-                new EcosystemData("BOSQUE_SECO_TROPICAL", "Bosque Seco Tropical", "Adaptación a la sequía y especies endémicas.", 4, "IGUANA_VERDE", List.of()),
-                new EcosystemData("LLANOS_SABANA", "Llanos y Sabana", "Humedales estacionales y fauna de pradera.", 5, "CHIGUIRO", List.of())
+                new EcosystemData(
+                        "BOSQUE_SECO_TROPICAL",
+                        "Bosque Seco Tropical",
+                        "Adaptación a la sequía y especies endémicas. Criterio de desbloqueo: Nivel 4.",
+                        4,
+                        "IGUANA_VERDE",
+                        List.of(
+                                new LessonInfo(
+                                        "Bienvenidos al Bosque Seco Tropical",
+                                        "El Bosque Seco Tropical es uno de los ecosistemas más amenazados y fascinantes de Colombia. Presente en valles interandinos y en la región Caribe, se caracteriza por experimentar largos meses sin lluvia seguidos de temporadas de aguaceros intensos.",
+                                        1,
+                                        20
+                                ),
+                                new LessonInfo(
+                                        "Un Bosque que Aprende a Ahorrar Agua",
+                                        "Para sobrevivir a meses de intensa sequía, muchos árboles pierden sus hojas (flora decidua) para evitar la transpiración, mientras que otros acumulan agua en sus gruesos troncos y desarrollan espinas protectoras.",
+                                        2,
+                                        25
+                                ),
+                                new LessonInfo(
+                                        "La Iguana Verde: Experta en el Sol",
+                                        "La iguana verde es un reptil maestro de la supervivencia térmica: regula su temperatura corporal tomando el sol en las ramas más altas y aprovecha la vegetación seca y flores para alimentarse con gran eficiencia.",
+                                        3,
+                                        30
+                                ),
+                                new LessonInfo(
+                                        "El Viaje del Agua entre Dos Estaciones",
+                                        "El ciclo del agua en el bosque seco es un baile estacional de contrastes: durante la sequía los arroyos se reducen a charcas aisladas, pero con las primeras lluvias el bosque reverdece en cuestión de pocos días.",
+                                        4,
+                                        35
+                                ),
+                                new LessonInfo(
+                                        "La Red de la Vida en el Bosque Seco",
+                                        "Las cadenas tróficas del bosque seco incluyen insectos polinizadores, aves como el tití cabeciblanco que se alimenta de néctar y frutos, serpientes de cascabel, armadillos y felinos como el ocelote.",
+                                        5,
+                                        40
+                                ),
+                                new LessonInfo(
+                                        "Semillas Viajeras y Bosques que Renacen",
+                                        "Muchas semillas de plantas del bosque seco tienen alas o espinas que les permiten viajar con el viento o adherirse al pelaje de los animales, esperando dormidas en el suelo hasta que caigan las lluvias para germinar.",
+                                        6,
+                                        45
+                                ),
+                                new LessonInfo(
+                                        "Cuando el Bosque Pierde su Hogar",
+                                        "La tala para agricultura, ganadería y urbanización ha reducido el bosque seco en Colombia a menos del 8% de su cobertura original, dejando a especies únicas sin corredores biológicos para desplazarse.",
+                                        7,
+                                        50
+                                ),
+                                new LessonInfo(
+                                        "Misión: Recuperar el Bosque Seco",
+                                        "¡Súmate al rescate del bosque seco! Diseña un plan de restauración ecológica: siembra de árboles nativos como el guayacán y el ceibo, creación de cercas vivas en fincas ganaderas y concientización comunitaria sobre la prevención de incendios.",
+                                        8,
+                                        60
+                                )
+                        )
+                ),
+                new EcosystemData(
+                        "LLANOS_SABANA",
+                        "Llanos y Sabana",
+                        "Humedales estacionales y fauna de pradera. Criterio de desbloqueo: Nivel 5.",
+                        5,
+                        "CHIGUIRO",
+                        List.of(
+                                new LessonInfo(
+                                        "Bienvenidos a los Llanos Colombianos",
+                                        "Los Llanos Orientales y la cuenca de la Orinoquía colombiana forman inmensas sabanas de pastizales naturales que se extienden hasta el horizonte, salpicadas de bosques de galería a orillas de los ríos.",
+                                        1,
+                                        20
+                                ),
+                                new LessonInfo(
+                                        "Un Mar de Pastos bajo el Sol",
+                                        "La vegetación de la sabana está dominada por pastos resistentes y palmas de moriche que crecen en suelos ácidos, adaptadas tanto al sol abrasador de la época seca como a meses de inundación.",
+                                        2,
+                                        25
+                                ),
+                                new LessonInfo(
+                                        "El Chigüiro: Gigante Tranquilo de los Llanos",
+                                        "El chigüiro o capibara es el roedor más grande del mundo y un nadador experto con membranas interdigitales. Vive en manadas familiares y es fundamental para la dinámica de pastoreo y los esteros llaneros.",
+                                        3,
+                                        30
+                                ),
+                                new LessonInfo(
+                                        "Cuando la Sabana se Convierte en Laguna",
+                                        "Durante el invierno llanero, las lluvias desbordan caños y esteros, transformando miles de hectáreas de tierra en gigantescos humedales donde peces, reptiles y mamíferos acuáticos se dispersan libremente.",
+                                        4,
+                                        35
+                                ),
+                                new LessonInfo(
+                                        "Vecinos de la Sabana: Depredadores y Presas",
+                                        "En los Llanos conviven caimanes del Orinoco, anacondas, corocoras rojas, garzas blancas, osos hormigueros gigantes, venados de cola blanca y el imponente jaguar que caza cerca de los morichales.",
+                                        5,
+                                        40
+                                ),
+                                new LessonInfo(
+                                        "Los Secretos del Suelo y los Humedales",
+                                        "Los morichales y humedales llaneros funcionan como gigantescos filtros naturales que almacenan agua limpia y liberan humedad en la temporada seca, siendo oasis vitales para la supervivencia de toda la fauna.",
+                                        6,
+                                        45
+                                ),
+                                new LessonInfo(
+                                        "Amenazas en la Orinoquía Colombiana",
+                                        "La quema descontrolada de pastos, la desecación de esteros para monocultivos extensivos y la contaminación de fuentes de agua ponen en peligro el delicado ciclo de sequías e inundaciones de la sabana.",
+                                        7,
+                                        50
+                                ),
+                                new LessonInfo(
+                                        "Misión: Proteger los Llanos y sus Aguas",
+                                        "¡Sé un verdadero guardián de la sabana! Propón soluciones para la conservación de la Orinoquía: proteger los nacimientos y morichales, evitar fuegos en verano, promover reservas naturales de la sociedad civil y convivir en armonía con la fauna nativa.",
+                                        8,
+                                        60
+                                )
+                        )
+                )
         );
 
         for (EcosystemData ecoData : ecosystemList) {
