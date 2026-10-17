@@ -1,38 +1,50 @@
 package com.guardianesdelplaneta.infrastructure.adapter.out.persistence;
 
+import com.guardianesdelplaneta.domain.model.ChildProfile;
+import com.guardianesdelplaneta.infrastructure.adapter.out.persistence.entity.ChildProfileEntity;
+import com.guardianesdelplaneta.infrastructure.adapter.out.persistence.entity.GuardianChildEntity;
+import com.guardianesdelplaneta.infrastructure.adapter.out.persistence.mapper.ChildProfilePersistenceMapper;
+import com.guardianesdelplaneta.infrastructure.adapter.out.persistence.repository.GuardianChildRepository;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.MySQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@SpringBootTest
-@Testcontainers
-public class GuardianChildPersistenceAdapterTest {
+import java.util.List;
 
-    @Container
-    static MySQLContainer<?> mysql = new MySQLContainer<>("mysql:8.0")
-            .withDatabaseName("testdb")
-            .withUsername("test")
-            .withPassword("test");
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-    @DynamicPropertySource
-    static void properties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", mysql::getJdbcUrl);
-        registry.add("spring.datasource.username", mysql::getUsername);
-        registry.add("spring.datasource.password", mysql::getPassword);
-        registry.add("spring.jpa.hibernate.ddl-auto", () -> "create-drop");
-    }
+@ExtendWith(MockitoExtension.class)
+class GuardianChildPersistenceAdapterTest {
 
-    @Autowired
+    @Mock
+    private GuardianChildRepository repository;
+
+    @Mock
+    private ChildProfilePersistenceMapper childMapper;
+
+    @InjectMocks
     private GuardianChildPersistenceAdapter adapter;
 
     @Test
-    void testContextLoads() {
-        assertNotNull(adapter);
+    @DisplayName("findChildrenByGuardianId debe retornar perfiles de niños asociados al acudiente")
+    void findChildrenByGuardianId_Success() {
+        ChildProfileEntity childEntity = new ChildProfileEntity();
+        GuardianChildEntity gcEntity = new GuardianChildEntity();
+        gcEntity.setChild(childEntity);
+        ChildProfile domain = new ChildProfile();
+        domain.setId(10L);
+        domain.setName("Mateo");
+
+        when(repository.findByGuardianId(1L)).thenReturn(List.of(gcEntity));
+        when(childMapper.toDomain(childEntity)).thenReturn(domain);
+
+        List<ChildProfile> result = adapter.findChildrenByGuardianId(1L);
+
+        assertEquals(1, result.size());
+        assertEquals("Mateo", result.get(0).getName());
     }
 }

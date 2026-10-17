@@ -1,38 +1,56 @@
 package com.guardianesdelplaneta.infrastructure.adapter.out.persistence;
 
+import com.guardianesdelplaneta.domain.model.ChildReward;
+import com.guardianesdelplaneta.infrastructure.adapter.out.persistence.entity.ChildRewardEntity;
+import com.guardianesdelplaneta.infrastructure.adapter.out.persistence.mapper.ChildRewardPersistenceMapper;
+import com.guardianesdelplaneta.infrastructure.adapter.out.persistence.repository.ChildRewardRepository;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.MySQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@SpringBootTest
-@Testcontainers
-public class ChildRewardPersistenceAdapterTest {
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-    @Container
-    static MySQLContainer<?> mysql = new MySQLContainer<>("mysql:8.0")
-            .withDatabaseName("testdb")
-            .withUsername("test")
-            .withPassword("test");
+@ExtendWith(MockitoExtension.class)
+class ChildRewardPersistenceAdapterTest {
 
-    @DynamicPropertySource
-    static void properties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", mysql::getJdbcUrl);
-        registry.add("spring.datasource.username", mysql::getUsername);
-        registry.add("spring.datasource.password", mysql::getPassword);
-        registry.add("spring.jpa.hibernate.ddl-auto", () -> "create-drop");
-    }
+    @Mock
+    private ChildRewardRepository repository;
 
-    @Autowired
+    @Mock
+    private ChildRewardPersistenceMapper mapper;
+
+    @InjectMocks
     private ChildRewardPersistenceAdapter adapter;
 
     @Test
-    void testContextLoads() {
-        assertNotNull(adapter);
+    @DisplayName("save debe persistir y retornar la recompensa del niño")
+    void save_Success() {
+        ChildReward domain = new ChildReward();
+        domain.setId(1L);
+        domain.setChildId(10L);
+        domain.setRewardId(2L);
+        ChildRewardEntity entity = new ChildRewardEntity();
+        when(mapper.toEntity(domain)).thenReturn(entity);
+        when(repository.save(entity)).thenReturn(entity);
+        when(mapper.toDomain(entity)).thenReturn(domain);
+
+        ChildReward saved = adapter.save(domain);
+
+        assertNotNull(saved);
+        assertEquals(1L, saved.getId());
+    }
+
+    @Test
+    @DisplayName("existsByChildIdAndRewardId debe retornar true o false")
+    void existsByChildIdAndRewardId_Success() {
+        when(repository.existsByChildIdAndRewardId(10L, 2L)).thenReturn(true);
+        when(repository.existsByChildIdAndRewardId(10L, 3L)).thenReturn(false);
+
+        assertTrue(adapter.existsByChildIdAndRewardId(10L, 2L));
+        assertFalse(adapter.existsByChildIdAndRewardId(10L, 3L));
     }
 }

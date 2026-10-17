@@ -1,38 +1,72 @@
 package com.guardianesdelplaneta.infrastructure.adapter.out.persistence;
 
+import com.guardianesdelplaneta.domain.model.User;
+import com.guardianesdelplaneta.infrastructure.adapter.out.persistence.entity.UserEntity;
+import com.guardianesdelplaneta.infrastructure.adapter.out.persistence.mapper.UserPersistenceMapper;
+import com.guardianesdelplaneta.infrastructure.adapter.out.persistence.repository.UserRepository;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.MySQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@SpringBootTest
-@Testcontainers
-public class UserPersistenceAdapterTest {
+import java.util.Optional;
 
-    @Container
-    static MySQLContainer<?> mysql = new MySQLContainer<>("mysql:8.0")
-            .withDatabaseName("testdb")
-            .withUsername("test")
-            .withPassword("test");
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-    @DynamicPropertySource
-    static void properties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", mysql::getJdbcUrl);
-        registry.add("spring.datasource.username", mysql::getUsername);
-        registry.add("spring.datasource.password", mysql::getPassword);
-        registry.add("spring.jpa.hibernate.ddl-auto", () -> "create-drop");
-    }
+@ExtendWith(MockitoExtension.class)
+class UserPersistenceAdapterTest {
 
-    @Autowired
+    @Mock
+    private UserRepository userRepository;
+
+    @Mock
+    private UserPersistenceMapper userPersistenceMapper;
+
+    @InjectMocks
     private UserPersistenceAdapter adapter;
 
     @Test
-    void testContextLoads() {
-        assertNotNull(adapter);
+    @DisplayName("save debe persistir y retornar el usuario")
+    void save_Success() {
+        User domain = new User();
+        domain.setId(1L);
+        domain.setUsername("guardian1");
+        UserEntity entity = new UserEntity();
+        when(userPersistenceMapper.toEntity(domain)).thenReturn(entity);
+        when(userRepository.save(entity)).thenReturn(entity);
+        when(userPersistenceMapper.toDomain(entity)).thenReturn(domain);
+
+        User saved = adapter.save(domain);
+
+        assertNotNull(saved);
+        assertEquals("guardian1", saved.getUsername());
+    }
+
+    @Test
+    @DisplayName("findByUsername debe retornar usuario cuando existe y vacío cuando no")
+    void findByUsername_HappyAndSadPath() {
+        UserEntity entity = new UserEntity();
+        User domain = new User();
+        domain.setId(1L);
+        domain.setUsername("guardian1");
+        when(userRepository.findByUsername("guardian1")).thenReturn(Optional.of(entity));
+        when(userPersistenceMapper.toDomain(entity)).thenReturn(domain);
+        when(userRepository.findByUsername("unknown")).thenReturn(Optional.empty());
+
+        assertTrue(adapter.findByUsername("guardian1").isPresent());
+        assertTrue(adapter.findByUsername("unknown").isEmpty());
+    }
+
+    @Test
+    @DisplayName("existsByUsername debe retornar true o false")
+    void existsByUsername_Success() {
+        when(userRepository.existsByUsername("guardian1")).thenReturn(true);
+        when(userRepository.existsByUsername("unknown")).thenReturn(false);
+
+        assertTrue(adapter.existsByUsername("guardian1"));
+        assertFalse(adapter.existsByUsername("unknown"));
     }
 }

@@ -24,6 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
+import java.util.stream.Collectors;
 
 @Component
 public class DataSeeder implements CommandLineRunner {
@@ -57,7 +59,13 @@ public class DataSeeder implements CommandLineRunner {
         log.info("Verificando e inicializando datos semilla...");
         Map<Integer, LevelEntity> levels = seedLevels();
         seedEcosystemsAndLessons(levels);
-        seedWelcomeLessonActivities();
+        seedBosqueAndinoActivities();
+        seedEcosystemActivities("PARAMO", ParamoActivitySeeder::buildActivities);
+        seedEcosystemActivities("OCEANO", OceanoActivitySeeder::buildActivities);
+        seedEcosystemActivities("SELVA_AMAZONICA", SelvaAmazonicaActivitySeeder::buildActivities);
+        seedEcosystemActivities("MANGLAR", ManglarActivitySeeder::buildActivities);
+        seedEcosystemActivities("BOSQUE_SECO_TROPICAL", BosqueSecoActivitySeeder::buildActivities);
+        seedEcosystemActivities("LLANOS_SABANA", LlanosSabanaActivitySeeder::buildActivities);
         seedAchievements();
         seedRewards(levels);
         log.info("Inicialización de datos semilla completada.");
@@ -86,6 +94,10 @@ public class DataSeeder implements CommandLineRunner {
                             .description(data.description())
                             .visualKey(data.visualKey())
                             .build()));
+            entity.setName(data.name());
+            entity.setDescription(data.description());
+            entity.setVisualKey(data.visualKey());
+            levelRepository.save(entity);
             map.put(data.number(), entity);
         }
 
@@ -100,7 +112,7 @@ public class DataSeeder implements CommandLineRunner {
                 new EcosystemData(
                         "BOSQUE_ANDINO",
                         "Bosque Andino",
-                        "Biodiversidad de alta montaña y flora nativa. Criterio de desbloqueo: Nivel 1 (Ecosistema inicial).",
+                        "Biodiversidad de alta montaña, niebla y flora nativa.",
                         1,
                         "OSO_ANDINO",
                         List.of(
@@ -214,7 +226,7 @@ public class DataSeeder implements CommandLineRunner {
                 new EcosystemData(
                         "OCEANO",
                         "Océano",
-                        "Contaminación marina y microplásticos. Criterio de desbloqueo: Nivel 2.",
+                        "Mares colombianos, arrecifes de coral y fauna marina.",
                         2,
                         "TORTUGA_MARINA",
                         List.of(
@@ -271,7 +283,7 @@ public class DataSeeder implements CommandLineRunner {
                 new EcosystemData(
                         "SELVA_AMAZONICA",
                         "Selva Amazónica",
-                        "Deforestación y pulmón del planeta. Criterio de desbloqueo: Nivel 3.",
+                        "El gran pulmón verde del mundo y ríos voladores.",
                         3,
                         "ANACONDA_VERDE",
                         List.of(
@@ -328,7 +340,7 @@ public class DataSeeder implements CommandLineRunner {
                 new EcosystemData(
                         "MANGLAR",
                         "Manglar",
-                        "Protección costera y cunas de vida acuática. Criterio de desbloqueo: Nivel 3.",
+                        "Bosques anfibios de protección costera y cunas de vida acuática.",
                         3,
                         "CANGREJO",
                         List.of(
@@ -385,7 +397,7 @@ public class DataSeeder implements CommandLineRunner {
                 new EcosystemData(
                         "BOSQUE_SECO_TROPICAL",
                         "Bosque Seco Tropical",
-                        "Adaptación a la sequía y especies endémicas. Criterio de desbloqueo: Nivel 4.",
+                        "Adaptación a la sequía y especies endémicas del Caribe.",
                         4,
                         "IGUANA_VERDE",
                         List.of(
@@ -442,7 +454,7 @@ public class DataSeeder implements CommandLineRunner {
                 new EcosystemData(
                         "LLANOS_SABANA",
                         "Llanos y Sabana",
-                        "Humedales estacionales y fauna de pradera. Criterio de desbloqueo: Nivel 5.",
+                        "Inmensas sabanas de pastizales, humedales y esteros.",
                         5,
                         "CHIGUIRO",
                         List.of(
@@ -510,120 +522,492 @@ public class DataSeeder implements CommandLineRunner {
                             .isActive(true)
                             .build()));
 
-            if (ecoEntity.getRequiredLevel() == null) {
-                ecoEntity.setRequiredLevel(requiredLevel);
-                ecoEntity.setMascotKey(ecoData.mascotKey());
-                ecosystemRepository.save(ecoEntity);
-            }
+            ecoEntity.setName(ecoData.name());
+            ecoEntity.setDescription(ecoData.description());
+            ecoEntity.setRequiredLevel(requiredLevel);
+            ecoEntity.setMascotKey(ecoData.mascotKey());
+            ecosystemRepository.save(ecoEntity);
 
-            // Solo sembrar lecciones si existen en la definición (por ahora Bosque Andino)
             if (!ecoData.lessons().isEmpty()) {
                 List<LessonEntity> currentLessons = lessonRepository.findByEcosystemIdOrderByOrderIndexAsc(ecoEntity.getId());
-                if (currentLessons.size() != ecoData.lessons().size()) {
-                    for (LessonInfo lessonInfo : ecoData.lessons()) {
-                        boolean exists = currentLessons.stream().anyMatch(l -> l.getOrderIndex().equals(lessonInfo.orderIndex()));
-                        if (!exists) {
-                            LessonEntity lesson = lessonRepository.save(LessonEntity.builder()
-                                    .ecosystem(ecoEntity)
-                                    .title(lessonInfo.title())
-                                    .content(lessonInfo.content())
-                                    .orderIndex(lessonInfo.orderIndex())
-                                    .xpReward(lessonInfo.xpReward())
-                                    .isActive(true)
-                                    .build());
+                Map<Integer, LessonEntity> currentByOrder = currentLessons.stream()
+                        .collect(Collectors.toMap(LessonEntity::getOrderIndex, l -> l, (l1, l2) -> l1));
 
-                            activityRepository.save(ActivityEntity.builder()
-                                    .lesson(lesson)
-                                    .type(ActivityType.MULTIPLE_CHOICE)
-                                    .title("Actividad: " + lessonInfo.title())
-                                    .configurationJson("{\"question\":\"¿Qué acción protege este elemento del bosque?\",\"options\":[\"Cuidar y no arrojar basura\",\"Destruir la vegetación\",\"Contaminar el agua\"],\"correctOption\":0}")
-                                    .xpReward(10)
-                                    .orderIndex(1)
-                                    .build());
-                        }
+                for (LessonInfo lessonInfo : ecoData.lessons()) {
+                    LessonEntity lesson = currentByOrder.get(lessonInfo.orderIndex());
+                    if (lesson != null) {
+                        lesson.setTitle(lessonInfo.title());
+                        lesson.setContent(lessonInfo.content());
+                        lesson.setXpReward(lessonInfo.xpReward());
+                        lessonRepository.save(lesson);
+                    } else {
+                        lesson = lessonRepository.save(LessonEntity.builder()
+                                .ecosystem(ecoEntity)
+                                .title(lessonInfo.title())
+                                .content(lessonInfo.content())
+                                .orderIndex(lessonInfo.orderIndex())
+                                .xpReward(lessonInfo.xpReward())
+                                .isActive(true)
+                                .build());
+
+                        activityRepository.save(ActivityEntity.builder()
+                                .lesson(lesson)
+                                .type(ActivityType.MULTIPLE_CHOICE)
+                                .title("Actividad: " + lessonInfo.title())
+                                .configurationJson("{\"question\":\"¿Qué acción protege este elemento del bosque?\",\"options\":[\"Cuidar y no arrojar basura\",\"Destruir la vegetación\",\"Contaminar el agua\"],\"correctOption\":0}")
+                                .xpReward(10)
+                                .orderIndex(1)
+                                .build());
                     }
                 }
             }
         }
     }
 
-    private void seedWelcomeLessonActivities() {
-        ecosystemRepository.findByCode("BOSQUE_ANDINO").ifPresent(ecosystem -> {
-            lessonRepository.findByEcosystemIdOrderByOrderIndexAsc(ecosystem.getId()).stream()
-                    .filter(l -> l.getOrderIndex() == 1)
-                    .findFirst()
-                    .ifPresent(lesson -> {
-                        List<ActivityEntity> currentActivities = activityRepository.findByLessonIdOrderByOrderIndexAsc(lesson.getId());
-                        if (currentActivities.size() < 6) {
-                            activityRepository.deleteAll(currentActivities);
+    private void seedBosqueAndinoActivities() {
+        seedEcosystemActivities("BOSQUE_ANDINO", this::buildActivitiesForBosqueAndinoLesson);
+    }
 
-                            List<ActivityEntity> activities = List.of(
-                                    // 1. MULTIPLE_CHOICE — ¿Dónde vive el oso de anteojos?
-                                    ActivityEntity.builder()
-                                            .lesson(lesson)
-                                            .type(ActivityType.MULTIPLE_CHOICE)
-                                            .title("¿Dónde vive el oso de anteojos?")
-                                            .configurationJson("{\"question\":\"¿Dónde vive el oso de anteojos?\",\"options\":[\"En el desierto caliente\",\"En el bosque andino y de niebla\",\"En el fondo del mar\"],\"correctAnswer\":\"En el bosque andino y de niebla\",\"correctOption\":1,\"difficulty\":\"Muy fácil\"}")
-                                            .xpReward(10)
-                                            .orderIndex(1)
-                                            .build(),
+    private void seedEcosystemActivities(String ecosystemCode, BiFunction<LessonEntity, Integer, List<ActivityEntity>> activityBuilder) {
+        try {
+            activityRepository.deleteIdentificationActivities();
+        } catch (Exception e) {
+            log.warn("No se pudieron purgar actividades IDENTIFICATION de forma nativa: {}", e.getMessage());
+        }
 
-                                    // 2. TRUE_FALSE — El bosque andino es hogar de muchos animales
-                                    ActivityEntity.builder()
-                                            .lesson(lesson)
-                                            .type(ActivityType.TRUE_FALSE)
-                                            .title("El bosque andino es hogar de muchos animales")
-                                            .configurationJson("{\"statement\":\"El bosque andino es hogar de muchos animales, aves e insectos.\",\"options\":[\"Verdadero\",\"Falso\"],\"correctAnswer\":\"Verdadero\",\"correctOption\":0,\"difficulty\":\"Muy fácil\"}")
-                                            .xpReward(10)
-                                            .orderIndex(2)
-                                            .build(),
+        ecosystemRepository.findByCode(ecosystemCode).ifPresent(ecosystem -> {
+            List<LessonEntity> lessons = lessonRepository.findByEcosystemIdOrderByOrderIndexAsc(ecosystem.getId());
+            for (LessonEntity lesson : lessons) {
+                int lessonOrder = lesson.getOrderIndex();
+                List<ActivityEntity> currentActivities = activityRepository.findByLessonIdOrderByOrderIndexAsc(lesson.getId());
+                List<ActivityEntity> definedActivities = activityBuilder.apply(lesson, lessonOrder);
 
-                                    // 3. IDENTIFICATION — ¿Cuál es el colibrí?
-                                    ActivityEntity.builder()
-                                            .lesson(lesson)
-                                            .type(ActivityType.IDENTIFICATION)
-                                            .title("¿Cuál es el colibrí?")
-                                            .configurationJson("{\"prompt\":\"Selecciona el colibrí entre las siguientes aves:\",\"options\":[{\"id\":\"tucan\",\"name\":\"Tucán\",\"visualKey\":\"IMG_TUCAN\"},{\"id\":\"colibri\",\"name\":\"Colibrí\",\"visualKey\":\"IMG_COLIBRI\"},{\"id\":\"loro\",\"name\":\"Loro\",\"visualKey\":\"IMG_LORO\"}],\"correctAnswer\":\"colibri\",\"correctOption\":1,\"difficulty\":\"Muy fácil\"}")
-                                            .xpReward(10)
-                                            .orderIndex(3)
-                                            .build(),
+                if (currentActivities.isEmpty()) {
+                    activityRepository.saveAll(definedActivities);
+                    log.info("Sembradas exitosamente 5 actividades para {} lección {} ({})", ecosystemCode, lessonOrder, lesson.getTitle());
+                } else {
+                    Map<Integer, ActivityEntity> existingByOrder = currentActivities.stream()
+                            .collect(Collectors.toMap(ActivityEntity::getOrderIndex, a -> a, (a1, a2) -> a1));
 
-                                    // 4. CLASSIFICATION — ¿Quiénes viven en el bosque?
-                                    ActivityEntity.builder()
-                                            .lesson(lesson)
-                                            .type(ActivityType.CLASSIFICATION)
-                                            .title("¿Quiénes viven en el bosque?")
-                                            .configurationJson("{\"instructions\":\"Separa los seres vivos del bosque de los objetos que no son vivos:\",\"categories\":[{\"id\":\"vivos\",\"name\":\"Seres vivos del bosque\"},{\"id\":\"no_vivos\",\"name\":\"Objetos no vivos\"}],\"items\":[{\"id\":\"oso\",\"name\":\"Oso de anteojos\"},{\"id\":\"palma\",\"name\":\"Palma de cera\"},{\"id\":\"botella\",\"name\":\"Botella plástica\"},{\"id\":\"llanta\",\"name\":\"Llanta vieja\"}],\"correctAnswers\":{\"oso\":\"vivos\",\"palma\":\"vivos\",\"botella\":\"no_vivos\",\"llanta\":\"no_vivos\"},\"difficulty\":\"Muy fácil\"}")
-                                            .xpReward(10)
-                                            .orderIndex(4)
-                                            .build(),
-
-                                    // 5. ORDERING — El camino del agua
-                                    ActivityEntity.builder()
-                                            .lesson(lesson)
-                                            .type(ActivityType.ORDERING)
-                                            .title("El camino del agua")
-                                            .configurationJson("{\"instructions\":\"Organiza los tres pasos sobre cómo el agua de la lluvia llega a una quebrada:\",\"steps\":[\"La lluvia cae sobre las hojas y el musgo\",\"El agua se infiltra y viaja por el suelo\",\"El agua brota limpia en la quebrada\"],\"correctSequence\":[0,1,2],\"difficulty\":\"Muy fácil\"}")
-                                            .xpReward(10)
-                                            .orderIndex(5)
-                                            .build(),
-
-                                    // 6. DRAG_AND_DROP — Construye tu bosque andino
-                                    ActivityEntity.builder()
-                                            .lesson(lesson)
-                                            .type(ActivityType.DRAG_AND_DROP)
-                                            .title("Construye tu bosque andino")
-                                            .configurationJson("{\"instructions\":\"Ubica cada elemento en su lugar correcto:\",\"targets\":[{\"zone\":\"bosque\",\"name\":\"El Bosque\"},{\"zone\":\"agua\",\"name\":\"La Quebrada\"},{\"zone\":\"rama\",\"name\":\"Las Ramas\"}],\"elements\":[{\"id\":\"arbol\",\"name\":\"Árbol nativo\"},{\"id\":\"pez\",\"name\":\"Pez de montaña\"},{\"id\":\"ave\",\"name\":\"Pájaro andino\"}],\"correctAnswers\":{\"arbol\":\"bosque\",\"pez\":\"agua\",\"ave\":\"rama\"},\"difficulty\":\"Muy fácil\"}")
-                                            .xpReward(10)
-                                            .orderIndex(6)
-                                            .build()
-                            );
-
-                            activityRepository.saveAll(activities);
-                            log.info("Sembradas exitosamente las 6 actividades de 'Bienvenidos al Bosque Andino'.");
+                    for (ActivityEntity def : definedActivities) {
+                        ActivityEntity existing = existingByOrder.get(def.getOrderIndex());
+                        if (existing != null) {
+                            existing.setType(def.getType());
+                            existing.setTitle(def.getTitle());
+                            existing.setConfigurationJson(def.getConfigurationJson());
+                            existing.setXpReward(def.getXpReward());
+                            activityRepository.save(existing);
+                        } else {
+                            activityRepository.save(def);
                         }
-                    });
+                    }
+
+                    List<ActivityEntity> extras = currentActivities.stream()
+                            .filter(a -> a.getOrderIndex() > 5)
+                            .toList();
+                    if (!extras.isEmpty()) {
+                        try {
+                            activityRepository.deleteAll(extras);
+                        } catch (Exception e) {
+                            log.warn("No se pudieron eliminar actividades sobrantes en {}: {}", ecosystemCode, e.getMessage());
+                        }
+                    }
+
+                    log.info("Actualizadas/sembradas exitosamente 5 actividades para {} lección {} ({})", ecosystemCode, lessonOrder, lesson.getTitle());
+                }
+            }
         });
+    }
+
+    private List<ActivityEntity> buildActivitiesForBosqueAndinoLesson(LessonEntity lesson, int lessonOrder) {
+        switch (lessonOrder) {
+            case 1:
+                return List.of(
+                        // 1. MULTIPLE_CHOICE
+                        ActivityEntity.builder()
+                                .lesson(lesson)
+                                .type(ActivityType.MULTIPLE_CHOICE)
+                                .title("¿Dónde vive el oso de anteojos?")
+                                .configurationJson("{\"question\":\"¿Dónde vive el oso de anteojos?\",\"options\":[\"En el desierto caliente\",\"En el bosque andino y de niebla\",\"En el fondo del mar\"],\"correctAnswer\":\"En el bosque andino y de niebla\",\"correctOption\":1,\"difficulty\":\"Muy fácil\"}")
+                                .xpReward(10)
+                                .orderIndex(1)
+                                .build(),
+                        // 2. TRUE_FALSE
+                        ActivityEntity.builder()
+                                .lesson(lesson)
+                                .type(ActivityType.TRUE_FALSE)
+                                .title("El bosque andino es hogar de muchos animales")
+                                .configurationJson("{\"statement\":\"El bosque andino es hogar de muchos animales, aves e insectos.\",\"options\":[\"Verdadero\",\"Falso\"],\"correctAnswer\":\"Verdadero\",\"correctOption\":0,\"difficulty\":\"Muy fácil\"}")
+                                .xpReward(10)
+                                .orderIndex(2)
+                                .build(),
+                        // 3. CLASSIFICATION
+                        ActivityEntity.builder()
+                                .lesson(lesson)
+                                .type(ActivityType.CLASSIFICATION)
+                                .title("¿Quiénes viven en el bosque?")
+                                .configurationJson("{\"instructions\":\"Separa los seres vivos del bosque de los objetos que no son vivos:\",\"categories\":[{\"id\":\"vivos\",\"name\":\"Seres vivos del bosque\"},{\"id\":\"no_vivos\",\"name\":\"Objetos no vivos\"}],\"items\":[{\"id\":\"oso\",\"name\":\"Oso de anteojos\"},{\"id\":\"palma\",\"name\":\"Palma de cera\"},{\"id\":\"botella\",\"name\":\"Botella plástica\"},{\"id\":\"llanta\",\"name\":\"Llanta vieja\"}],\"correctAnswers\":{\"oso\":\"vivos\",\"palma\":\"vivos\",\"botella\":\"no_vivos\",\"llanta\":\"no_vivos\"},\"difficulty\":\"Muy fácil\"}")
+                                .xpReward(10)
+                                .orderIndex(3)
+                                .build(),
+                        // 4. ORDERING
+                        ActivityEntity.builder()
+                                .lesson(lesson)
+                                .type(ActivityType.ORDERING)
+                                .title("El camino del agua")
+                                .configurationJson("{\"instructions\":\"Organiza los tres pasos sobre cómo el agua de la lluvia llega a una quebrada:\",\"steps\":[\"La lluvia cae sobre las hojas y el musgo\",\"El agua se infiltra y viaja por el suelo\",\"El agua brota limpia en la quebrada\"],\"correctSequence\":[0,1,2],\"difficulty\":\"Muy fácil\"}")
+                                .xpReward(10)
+                                .orderIndex(4)
+                                .build(),
+                        // 5. DRAG_AND_DROP
+                        ActivityEntity.builder()
+                                .lesson(lesson)
+                                .type(ActivityType.DRAG_AND_DROP)
+                                .title("Construye tu bosque andino")
+                                .configurationJson("{\"instructions\":\"Ubica cada elemento en su lugar correcto:\",\"targets\":[{\"zone\":\"bosque\",\"name\":\"El Bosque\"},{\"zone\":\"agua\",\"name\":\"La Quebrada\"},{\"zone\":\"rama\",\"name\":\"Las Ramas\"}],\"elements\":[{\"id\":\"arbol\",\"name\":\"Árbol nativo\"},{\"id\":\"pez\",\"name\":\"Pez de montaña\"},{\"id\":\"ave\",\"name\":\"Pájaro andino\"}],\"correctAnswers\":{\"arbol\":\"bosque\",\"pez\":\"agua\",\"ave\":\"rama\"},\"difficulty\":\"Muy fácil\"}")
+                                .xpReward(10)
+                                .orderIndex(5)
+                                .build()
+                );
+            case 2:
+                return List.of(
+                        // 1. MULTIPLE_CHOICE
+                        ActivityEntity.builder()
+                                .lesson(lesson)
+                                .type(ActivityType.MULTIPLE_CHOICE)
+                                .title("¿Qué es la biodiversidad?")
+                                .configurationJson("{\"question\":\"¿Qué significa la palabra 'biodiversidad' en el bosque andino?\",\"options\":[\"Solo los animales que pueden volar\",\"La gran variedad de seres vivos que habitan un lugar\",\"Las rocas y piedras de las montañas\"],\"correctAnswer\":\"La gran variedad de seres vivos que habitan un lugar\",\"correctOption\":1,\"difficulty\":\"Fácil\"}")
+                                .xpReward(10)
+                                .orderIndex(1)
+                                .build(),
+                        // 2. TRUE_FALSE
+                        ActivityEntity.builder()
+                                .lesson(lesson)
+                                .type(ActivityType.TRUE_FALSE)
+                                .title("El musgo retiene agua como esponja")
+                                .configurationJson("{\"statement\":\"Los musgos del bosque andino actúan como esponjas naturales absorbiendo el agua de la niebla.\",\"options\":[\"Verdadero\",\"Falso\"],\"correctAnswer\":\"Verdadero\",\"correctOption\":0,\"difficulty\":\"Fácil\"}")
+                                .xpReward(10)
+                                .orderIndex(2)
+                                .build(),
+                        // 3. CLASSIFICATION
+                        ActivityEntity.builder()
+                                .lesson(lesson)
+                                .type(ActivityType.CLASSIFICATION)
+                                .title("Flora y Fauna Andina")
+                                .configurationJson("{\"instructions\":\"Clasifica cada ser vivo según sea una Planta (Flora) o un Animal (Fauna):\",\"categories\":[{\"id\":\"flora\",\"name\":\"Flora (Plantas)\"},{\"id\":\"fauna\",\"name\":\"Fauna (Animales)\"}],\"items\":[{\"id\":\"orquidea\",\"name\":\"Orquídea silvestre\"},{\"id\":\"colibri\",\"name\":\"Colibrí picoespada\"},{\"id\":\"roble\",\"name\":\"Roble andino\"},{\"id\":\"venado\",\"name\":\"Venado de páramo\"}],\"correctAnswers\":{\"orquidea\":\"flora\",\"colibri\":\"fauna\",\"roble\":\"flora\",\"venado\":\"fauna\"},\"difficulty\":\"Fácil\"}")
+                                .xpReward(10)
+                                .orderIndex(3)
+                                .build(),
+                        // 4. ORDERING
+                        ActivityEntity.builder()
+                                .lesson(lesson)
+                                .type(ActivityType.ORDERING)
+                                .title("De semilla a árbol andino")
+                                .configurationJson("{\"instructions\":\"Ordena las etapas de crecimiento de un roble andino:\",\"steps\":[\"La semilla cae en tierra fértil húmeda\",\"Brotan las primeras hojas verdes\",\"Crece hasta ser un imponente árbol del dosel\"],\"correctSequence\":[0,1,2],\"difficulty\":\"Fácil\"}")
+                                .xpReward(10)
+                                .orderIndex(4)
+                                .build(),
+                        // 5. DRAG_AND_DROP
+                        ActivityEntity.builder()
+                                .lesson(lesson)
+                                .type(ActivityType.DRAG_AND_DROP)
+                                .title("Estratos de la montaña")
+                                .configurationJson("{\"instructions\":\"Ubica a cada habitante en su estrato correspondiente del bosque:\",\"targets\":[{\"zone\":\"suelo\",\"name\":\"Suelo húmedo\"},{\"zone\":\"copa\",\"name\":\"Copa de los árboles\"},{\"zone\":\"aire\",\"name\":\"Cielo andino\"}],\"elements\":[{\"id\":\"champi\",\"name\":\"Hongo del suelo\"},{\"id\":\"mono\",\"name\":\"Mono nocturno\"},{\"id\":\"aguila\",\"name\":\"Águila crestada\"}],\"correctAnswers\":{\"champi\":\"suelo\",\"mono\":\"copa\",\"aguila\":\"aire\"},\"difficulty\":\"Fácil\"}")
+                                .xpReward(10)
+                                .orderIndex(5)
+                                .build()
+                );
+            case 3:
+                return List.of(
+                        // 1. MULTIPLE_CHOICE
+                        ActivityEntity.builder()
+                                .lesson(lesson)
+                                .type(ActivityType.MULTIPLE_CHOICE)
+                                .title("El jardinero de los Andes")
+                                .configurationJson("{\"question\":\"¿Por qué al oso de anteojos se le llama el 'jardinero de los Andes'?\",\"options\":[\"Porque riega las flores con una regadera\",\"Porque al comer frutos dispersa sus semillas por la montaña\",\"Porque poda los arbustos con sus garras\"],\"correctAnswer\":\"Porque al comer frutos dispersa sus semillas por la montaña\",\"correctOption\":1,\"difficulty\":\"Fácil - Intermedio\"}")
+                                .xpReward(15)
+                                .orderIndex(1)
+                                .build(),
+                        // 2. TRUE_FALSE
+                        ActivityEntity.builder()
+                                .lesson(lesson)
+                                .type(ActivityType.TRUE_FALSE)
+                                .title("La pava andina dispersora")
+                                .configurationJson("{\"statement\":\"La pava andina come frutos silvestres y ayuda a reforestar naturalmente las laderas de la montaña.\",\"options\":[\"Verdadero\",\"Falso\"],\"correctAnswer\":\"Verdadero\",\"correctOption\":0,\"difficulty\":\"Fácil - Intermedio\"}")
+                                .xpReward(15)
+                                .orderIndex(2)
+                                .build(),
+                        // 3. CLASSIFICATION
+                        ActivityEntity.builder()
+                                .lesson(lesson)
+                                .type(ActivityType.CLASSIFICATION)
+                                .title("Aves y Mamíferos Andinos")
+                                .configurationJson("{\"instructions\":\"Distingue entre las Aves del bosque andino y los Mamíferos:\",\"categories\":[{\"id\":\"aves\",\"name\":\"Aves andinas\"},{\"id\":\"mamiferos\",\"name\":\"Mamíferos andinos\"}],\"items\":[{\"id\":\"tucan\",\"name\":\"Tucán piquiplano\"},{\"id\":\"cusumbo\",\"name\":\"Cusumbo de montaña\"},{\"id\":\"gallito\",\"name\":\"Gallito de las rocas\"},{\"id\":\"danta\",\"name\":\"Danta de montaña\"}],\"correctAnswers\":{\"tucan\":\"aves\",\"cusumbo\":\"mamiferos\",\"gallito\":\"aves\",\"danta\":\"mamiferos\"},\"difficulty\":\"Fácil - Intermedio\"}")
+                                .xpReward(15)
+                                .orderIndex(3)
+                                .build(),
+                        // 4. ORDERING
+                        ActivityEntity.builder()
+                                .lesson(lesson)
+                                .type(ActivityType.ORDERING)
+                                .title("El viaje de las semillas")
+                                .configurationJson("{\"instructions\":\"Ordena el ciclo de dispersión de semillas del oso andino:\",\"steps\":[\"El oso come deliciosos frutos silvestres\",\"El oso camina largas distancias por la cordillera\",\"Deposita semillas en el suelo donde nacen nuevos árboles\"],\"correctSequence\":[0,1,2],\"difficulty\":\"Fácil - Intermedio\"}")
+                                .xpReward(15)
+                                .orderIndex(4)
+                                .build(),
+                        // 5. DRAG_AND_DROP
+                        ActivityEntity.builder()
+                                .lesson(lesson)
+                                .type(ActivityType.DRAG_AND_DROP)
+                                .title("Alimentación en el bosque")
+                                .configurationJson("{\"instructions\":\"Asigna cada especie a su tipo principal de alimento:\",\"targets\":[{\"zone\":\"frutos\",\"name\":\"Comedor de frutos\"},{\"zone\":\"nectar\",\"name\":\"Bebedor de néctar\"},{\"zone\":\"insectos\",\"name\":\"Cazador de insectos\"}],\"elements\":[{\"id\":\"oso\",\"name\":\"Oso andino\"},{\"id\":\"colibri\",\"name\":\"Colibrí andino\"},{\"id\":\"rana\",\"name\":\"Rana de lluvia\"}],\"correctAnswers\":{\"oso\":\"frutos\",\"colibri\":\"nectar\",\"rana\":\"insectos\"},\"difficulty\":\"Fácil - Intermedio\"}")
+                                .xpReward(15)
+                                .orderIndex(5)
+                                .build()
+                );
+            case 4:
+                return List.of(
+                        // 1. MULTIPLE_CHOICE
+                        ActivityEntity.builder()
+                                .lesson(lesson)
+                                .type(ActivityType.MULTIPLE_CHOICE)
+                                .title("La fábrica de agua")
+                                .configurationJson("{\"question\":\"¿Qué función ecológica cumple la densa niebla en el bosque andino?\",\"options\":[\"Enfriar las rocas sin ningún efecto en el agua\",\"Las plantas atrapan sus microgotas alimentando manantiales y ríos\",\"Impedir que crezcan las plantas\"],\"correctAnswer\":\"Las plantas atrapan sus microgotas alimentando manantiales y ríos\",\"correctOption\":1,\"difficulty\":\"Intermedio\"}")
+                                .xpReward(15)
+                                .orderIndex(1)
+                                .build(),
+                        // 2. TRUE_FALSE
+                        ActivityEntity.builder()
+                                .lesson(lesson)
+                                .type(ActivityType.TRUE_FALSE)
+                                .title("Regulación hídrica")
+                                .configurationJson("{\"statement\":\"El bosque andino amortigua las lluvias fuertes y previene avalanchas e inundaciones en las partes bajas.\",\"options\":[\"Verdadero\",\"Falso\"],\"correctAnswer\":\"Verdadero\",\"correctOption\":0,\"difficulty\":\"Intermedio\"}")
+                                .xpReward(15)
+                                .orderIndex(2)
+                                .build(),
+                        // 3. CLASSIFICATION
+                        ActivityEntity.builder()
+                                .lesson(lesson)
+                                .type(ActivityType.CLASSIFICATION)
+                                .title("Cuidado vs Daño a las fuentes de agua")
+                                .configurationJson("{\"instructions\":\"Clasifica las acciones según protejan o dañen las fuentes hídricas:\",\"categories\":[{\"id\":\"cuidado\",\"name\":\"Protección del agua\"},{\"id\":\"dano\",\"name\":\"Contaminación y daño\"}],\"items\":[{\"id\":\"alisos\",\"name\":\"Sembrar alisos en las riberas\"},{\"id\":\"plastico\",\"name\":\"Arrojar plásticos al arroyo\"},{\"id\":\"pesticida\",\"name\":\"Verter pesticidas en la quebrada\"},{\"id\":\"limpieza\",\"name\":\"Jornadas comunitarias de limpieza\"}],\"correctAnswers\":{\"alisos\":\"cuidado\",\"plastico\":\"dano\",\"pesticida\":\"dano\",\"limpieza\":\"cuidado\"},\"difficulty\":\"Intermedio\"}")
+                                .xpReward(15)
+                                .orderIndex(3)
+                                .build(),
+                        // 4. ORDERING
+                        ActivityEntity.builder()
+                                .lesson(lesson)
+                                .type(ActivityType.ORDERING)
+                                .title("El ciclo del agua de montaña")
+                                .configurationJson("{\"instructions\":\"Ordena el recorrido del agua desde la atmósfera hasta las comunidades:\",\"steps\":[\"La niebla choca contra la vegetación de la cordillera\",\"Los musgos y bromelias filtran y entregan agua pura al suelo\",\"Nacen arroyos limpios que abastecen los acueductos\"],\"correctSequence\":[0,1,2],\"difficulty\":\"Intermedio\"}")
+                                .xpReward(15)
+                                .orderIndex(4)
+                                .build(),
+                        // 5. DRAG_AND_DROP
+                        ActivityEntity.builder()
+                                .lesson(lesson)
+                                .type(ActivityType.DRAG_AND_DROP)
+                                .title("Zonas de la cuenca hídrica")
+                                .configurationJson("{\"instructions\":\"Ubica cada elemento en la parte de la cuenca que le corresponde:\",\"targets\":[{\"zone\":\"alta\",\"name\":\"Nacimiento (Zona alta)\"},{\"zone\":\"media\",\"name\":\"Caudal medio (Zona media)\"},{\"zone\":\"baja\",\"name\":\"Comunidades (Zona baja)\"}],\"elements\":[{\"id\":\"manantial\",\"name\":\"Manantial de niebla\"},{\"id\":\"cascada\",\"name\":\"Cascada y bosque ripario\"},{\"id\":\"acueducto\",\"name\":\"Bocatoma de acueducto\"}],\"correctAnswers\":{\"manantial\":\"alta\",\"cascada\":\"media\",\"acueducto\":\"baja\"},\"difficulty\":\"Intermedio\"}")
+                                .xpReward(15)
+                                .orderIndex(5)
+                                .build()
+                );
+            case 5:
+                return List.of(
+                        // 1. MULTIPLE_CHOICE
+                        ActivityEntity.builder()
+                                .lesson(lesson)
+                                .type(ActivityType.MULTIPLE_CHOICE)
+                                .title("El rol de los polinizadores")
+                                .configurationJson("{\"question\":\"¿Qué ocurriría en el bosque andino si desaparecen las abejas y los colibríes?\",\"options\":[\"Muchas especies de plantas no podrán reproducirse ni dar frutos\",\"Los árboles crecerán más rápido al no tener visitantes\",\"El viento sustituirá de inmediato toda la polinización sin problema\"],\"correctAnswer\":\"Muchas especies de plantas no podrán reproducirse ni dar frutos\",\"correctOption\":0,\"difficulty\":\"Intermedio - Avanzado\"}")
+                                .xpReward(20)
+                                .orderIndex(1)
+                                .build(),
+                        // 2. TRUE_FALSE
+                        ActivityEntity.builder()
+                                .lesson(lesson)
+                                .type(ActivityType.TRUE_FALSE)
+                                .title("Orquídeas y epífitas")
+                                .configurationJson("{\"statement\":\"Las orquídeas epífitas viven sobre los troncos para recibir luz sin quitarle nutrientes al árbol hospedero.\",\"options\":[\"Verdadero\",\"Falso\"],\"correctAnswer\":\"Verdadero\",\"correctOption\":0,\"difficulty\":\"Intermedio - Avanzado\"}")
+                                .xpReward(20)
+                                .orderIndex(2)
+                                .build(),
+                        // 3. CLASSIFICATION
+                        ActivityEntity.builder()
+                                .lesson(lesson)
+                                .type(ActivityType.CLASSIFICATION)
+                                .title("Productores y Consumidores")
+                                .configurationJson("{\"instructions\":\"Clasifica los organismos según su posición en la red trófica:\",\"categories\":[{\"id\":\"productor\",\"name\":\"Productores autótrofos\"},{\"id\":\"consumidor\",\"name\":\"Consumidores heterótrofos\"}],\"items\":[{\"id\":\"helecho\",\"name\":\"Helecho arbóreo gigante\"},{\"id\":\"puma\",\"name\":\"Puma andino\"},{\"id\":\"palma\",\"name\":\"Palma de cera del Quindío\"},{\"id\":\"ardilla\",\"name\":\"Ardilla andina de cola roja\"}],\"correctAnswers\":{\"helecho\":\"productor\",\"puma\":\"consumidor\",\"palma\":\"productor\",\"ardilla\":\"consumidor\"},\"difficulty\":\"Intermedio - Avanzado\"}")
+                                .xpReward(20)
+                                .orderIndex(3)
+                                .build(),
+                        // 4. ORDERING
+                        ActivityEntity.builder()
+                                .lesson(lesson)
+                                .type(ActivityType.ORDERING)
+                                .title("Cadena alimenticia andina")
+                                .configurationJson("{\"instructions\":\"Organiza el flujo de energía en la cadena trófica de la montaña:\",\"steps\":[\"La planta silvestre capta luz solar y produce frutos\",\"El venado soche consume las hojas y frutos de la planta\",\"El puma andino como gran carnívoro regula la población de herbívoros\"],\"correctSequence\":[0,1,2],\"difficulty\":\"Intermedio - Avanzado\"}")
+                                .xpReward(20)
+                                .orderIndex(4)
+                                .build(),
+                        // 5. DRAG_AND_DROP
+                        ActivityEntity.builder()
+                                .lesson(lesson)
+                                .type(ActivityType.DRAG_AND_DROP)
+                                .title("Interacciones ecológicas")
+                                .configurationJson("{\"instructions\":\"Relaciona a cada organismo con el servicio ecológico clave que brinda:\",\"targets\":[{\"zone\":\"polinizar\",\"name\":\"Polinización\"},{\"zone\":\"dispersar\",\"name\":\"Dispersión de semillas\"},{\"zone\":\"reciclar\",\"name\":\"Descomposición y reciclaje\"}],\"elements\":[{\"id\":\"murcielago\",\"name\":\"Murciélago nectarívoro\"},{\"id\":\"mono\",\"name\":\"Mono nocturno\"},{\"id\":\"hongo\",\"name\":\"Hongo de repisa\"}],\"correctAnswers\":{\"murcielago\":\"polinizar\",\"mono\":\"dispersar\",\"hongo\":\"reciclar\"},\"difficulty\":\"Intermedio - Avanzado\"}")
+                                .xpReward(20)
+                                .orderIndex(5)
+                                .build()
+                );
+            case 6:
+                return List.of(
+                        // 1. MULTIPLE_CHOICE
+                        ActivityEntity.builder()
+                                .lesson(lesson)
+                                .type(ActivityType.MULTIPLE_CHOICE)
+                                .title("La capa protectora del suelo")
+                                .configurationJson("{\"question\":\"¿Cuál es la función vital de la hojarasca y musgos que cubren el suelo andino?\",\"options\":[\"Impedir que las raíces de los árboles respiren\",\"Nutrir la tierra, retener humedad y evitar que la lluvia arrastre el suelo\",\"Hacer que el bosque sea resbaloso y peligroso\"],\"correctAnswer\":\"Nutrir la tierra, retener humedad y evitar que la lluvia arrastre el suelo\",\"correctOption\":1,\"difficulty\":\"Avanzado\"}")
+                                .xpReward(20)
+                                .orderIndex(1)
+                                .build(),
+                        // 2. TRUE_FALSE
+                        ActivityEntity.builder()
+                                .lesson(lesson)
+                                .type(ActivityType.TRUE_FALSE)
+                                .title("Tala y erosión")
+                                .configurationJson("{\"statement\":\"Al talar los bosques de ladera, las raíces mueren y las lluvias provocan deslaves y pérdida de suelo fértil.\",\"options\":[\"Verdadero\",\"Falso\"],\"correctAnswer\":\"Verdadero\",\"correctOption\":0,\"difficulty\":\"Avanzado\"}")
+                                .xpReward(20)
+                                .orderIndex(2)
+                                .build(),
+                        // 3. CLASSIFICATION
+                        ActivityEntity.builder()
+                                .lesson(lesson)
+                                .type(ActivityType.CLASSIFICATION)
+                                .title("Guardianes del suelo vs Habitantes del dosel")
+                                .configurationJson("{\"instructions\":\"Clasifica a los seres según habiten el suelo o la copa de los árboles:\",\"categories\":[{\"id\":\"suelo\",\"name\":\"Habitantes del suelo\"},{\"id\":\"dosel\",\"name\":\"Habitantes del dosel (Copa)\"}],\"items\":[{\"id\":\"lombriz\",\"name\":\"Lombriz andina\"},{\"id\":\"bromelia\",\"name\":\"Bromelia epífita\"},{\"id\":\"escarabajo\",\"name\":\"Escarabajo estercolero\"},{\"id\":\"tangara\",\"name\":\"Tángara multicolor\"}],\"correctAnswers\":{\"lombriz\":\"suelo\",\"bromelia\":\"dosel\",\"escarabajo\":\"suelo\",\"tangara\":\"dosel\"},\"difficulty\":\"Avanzado\"}")
+                                .xpReward(20)
+                                .orderIndex(3)
+                                .build(),
+                        // 4. ORDERING
+                        ActivityEntity.builder()
+                                .lesson(lesson)
+                                .type(ActivityType.ORDERING)
+                                .title("Formación de suelo fértil")
+                                .configurationJson("{\"instructions\":\"Ordena los pasos de la formación del humus fértil en el bosque:\",\"steps\":[\"Caen hojas, ramas secas y frutos al piso forestal\",\"Hongos, bacterias e insectos descomponen la materia orgánica\",\"Se genera humus rico que nutre a los gigantes del bosque\"],\"correctSequence\":[0,1,2],\"difficulty\":\"Avanzado\"}")
+                                .xpReward(20)
+                                .orderIndex(4)
+                                .build(),
+                        // 5. DRAG_AND_DROP
+                        ActivityEntity.builder()
+                                .lesson(lesson)
+                                .type(ActivityType.DRAG_AND_DROP)
+                                .title("Capas del suelo andino")
+                                .configurationJson("{\"instructions\":\"Ubica cada componente en la capa del suelo que le corresponde:\",\"targets\":[{\"zone\":\"superficie\",\"name\":\"Capa superficial viva\"},{\"zone\":\"humus\",\"name\":\"Suelo fértil (Humus)\"},{\"zone\":\"roca\",\"name\":\"Roca madre profunda\"}],\"elements\":[{\"id\":\"hojarasca\",\"name\":\"Capa de hojas secas\"},{\"id\":\"raices\",\"name\":\"Red de raíces y micorrizas\"},{\"id\":\"piedras\",\"name\":\"Piedras y base mineral\"}],\"correctAnswers\":{\"hojarasca\":\"superficie\",\"raices\":\"humus\",\"piedras\":\"roca\"},\"difficulty\":\"Avanzado\"}")
+                                .xpReward(20)
+                                .orderIndex(5)
+                                .build()
+                );
+            case 7:
+                return List.of(
+                        // 1. MULTIPLE_CHOICE
+                        ActivityEntity.builder()
+                                .lesson(lesson)
+                                .type(ActivityType.MULTIPLE_CHOICE)
+                                .title("Fragmentación de hábitats")
+                                .configurationJson("{\"question\":\"¿Por qué la tala y construcción de carreteras no planificadas amenazan a la fauna andina?\",\"options\":[\"Porque fragmentan los bosques y aíslan a las poblaciones impidiendo su reproducción\",\"Porque a los animales les gustan los caminos pavimentados\",\"Porque aumenta la comida disponible para todos\"],\"correctAnswer\":\"Porque fragmentan los bosques y aíslan a las poblaciones impidiendo su reproducción\",\"correctOption\":0,\"difficulty\":\"Avanzado - Difícil\"}")
+                                .xpReward(25)
+                                .orderIndex(1)
+                                .build(),
+                        // 2. TRUE_FALSE
+                        ActivityEntity.builder()
+                                .lesson(lesson)
+                                .type(ActivityType.TRUE_FALSE)
+                                .title("Especies exóticas invasoras")
+                                .configurationJson("{\"statement\":\"Monocultivos de pino y eucalipto en laderas andinas secan las fuentes hídricas y acidifican el suelo nativo.\",\"options\":[\"Verdadero\",\"Falso\"],\"correctAnswer\":\"Verdadero\",\"correctOption\":0,\"difficulty\":\"Avanzado - Difícil\"}")
+                                .xpReward(25)
+                                .orderIndex(2)
+                                .build(),
+                        // 3. CLASSIFICATION
+                        ActivityEntity.builder()
+                                .lesson(lesson)
+                                .type(ActivityType.CLASSIFICATION)
+                                .title("Amenazas vs Prácticas Sostenibles")
+                                .configurationJson("{\"instructions\":\"Clasifica cada actividad humana según sea una amenaza o una práctica de conservación:\",\"categories\":[{\"id\":\"amenaza\",\"name\":\"Amenaza ecológica\"},{\"id\":\"sostenible\",\"name\":\"Práctica sostenible\"}],\"items\":[{\"id\":\"ganaderia\",\"name\":\"Ganadería extensiva en pendientes\"},{\"id\":\"cafe\",\"name\":\"Café bajo sombra agroforestal\"},{\"id\":\"caza\",\"name\":\"Caza furtiva de fauna silvestre\"},{\"id\":\"corredores\",\"name\":\"Creación de corredores biológicos\"}],\"correctAnswers\":{\"ganaderia\":\"amenaza\",\"cafe\":\"sostenible\",\"caza\":\"amenaza\",\"corredores\":\"sostenible\"},\"difficulty\":\"Avanzado - Difícil\"}")
+                                .xpReward(25)
+                                .orderIndex(3)
+                                .build(),
+                        // 4. ORDERING
+                        ActivityEntity.builder()
+                                .lesson(lesson)
+                                .type(ActivityType.ORDERING)
+                                .title("Cadena del impacto ambiental")
+                                .configurationJson("{\"instructions\":\"Ordena la secuencia destructiva provocada por la tala ilegal:\",\"steps\":[\"Tala y quema de vegetación nativa en la montaña\",\"Lluvias intensas lavan el suelo desprovisto de cobertura vegetal\",\"Ocurren derrumbes que colmatan ríos y afectan comunidades abajo\"],\"correctSequence\":[0,1,2],\"difficulty\":\"Avanzado - Difícil\"}")
+                                .xpReward(25)
+                                .orderIndex(4)
+                                .build(),
+                        // 5. DRAG_AND_DROP
+                        ActivityEntity.builder()
+                                .lesson(lesson)
+                                .type(ActivityType.DRAG_AND_DROP)
+                                .title("Estrategias de restauración")
+                                .configurationJson("{\"instructions\":\"Empareja cada amenaza con la solución técnica ecológica adecuada:\",\"targets\":[{\"zone\":\"tala\",\"name\":\"Reforestación con nativas\"},{\"zone\":\"aislamiento\",\"name\":\"Corredores biológicos\"},{\"zone\":\"caza\",\"name\":\"Vigilancia comunitaria\"}],\"elements\":[{\"id\":\"suelo_pelado\",\"name\":\"Laderas deforestadas\"},{\"id\":\"fauna_encerrada\",\"name\":\"Poblaciones aisladas\"},{\"id\":\"trafico\",\"name\":\"Tráfico de fauna\"}],\"correctAnswers\":{\"suelo_pelado\":\"tala\",\"fauna_encerrada\":\"aislamiento\",\"trafico\":\"caza\"},\"difficulty\":\"Avanzado - Difícil\"}")
+                                .xpReward(25)
+                                .orderIndex(5)
+                                .build()
+                );
+            case 8:
+                return List.of(
+                        // 1. MULTIPLE_CHOICE
+                        ActivityEntity.builder()
+                                .lesson(lesson)
+                                .type(ActivityType.MULTIPLE_CHOICE)
+                                .title("Misión Guardián Andino")
+                                .configurationJson("{\"question\":\"¿Cuál es la estrategia comunitaria más integral para asegurar el futuro del bosque andino?\",\"options\":[\"Restaurar cuencas con plantas nativas, proteger corredores y educar a la comunidad\",\"Reemplazar el bosque nativo con jardines decorativos de plástico\",\"Ignorar las alertas ambientales para no preocupar a la gente\"],\"correctAnswer\":\"Restaurar cuencas con plantas nativas, proteger corredores y educar a la comunidad\",\"correctOption\":0,\"difficulty\":\"Experto (Desafío Guardián)\"}")
+                                .xpReward(30)
+                                .orderIndex(1)
+                                .build(),
+                        // 2. TRUE_FALSE
+                        ActivityEntity.builder()
+                                .lesson(lesson)
+                                .type(ActivityType.TRUE_FALSE)
+                                .title("Palma de Cera y Loro Orejiamarillo")
+                                .configurationJson("{\"statement\":\"La protección de la Palma de Cera en Colombia es indispensable para salvar de la extinción al Loro Orejiamarillo.\",\"options\":[\"Verdadero\",\"Falso\"],\"correctAnswer\":\"Verdadero\",\"correctOption\":0,\"difficulty\":\"Experto (Desafío Guardián)\"}")
+                                .xpReward(30)
+                                .orderIndex(2)
+                                .build(),
+                        // 3. CLASSIFICATION
+                        ActivityEntity.builder()
+                                .lesson(lesson)
+                                .type(ActivityType.CLASSIFICATION)
+                                .title("Acción Guardiana vs Indiferencia")
+                                .configurationJson("{\"instructions\":\"Clasifica las actitudes frente al compromiso ambiental:\",\"categories\":[{\"id\":\"guardian\",\"name\":\"Acción de Guardián\"},{\"id\":\"indiferencia\",\"name\":\"Indiferencia o daño\"}],\"items\":[{\"id\":\"vivero\",\"name\":\"Crear un vivero de robles andinos\"},{\"id\":\"fogata\",\"name\":\"Dejar fogatas encendidas en el bosque\"},{\"id\":\"denuncia\",\"name\":\"Denunciar talas ilegales ante autoridades\"},{\"id\":\"basura\",\"name\":\"Arrojar pilas y plásticos al monte\"}],\"correctAnswers\":{\"vivero\":\"guardian\",\"fogata\":\"indiferencia\",\"denuncia\":\"guardian\",\"basura\":\"indiferencia\"},\"difficulty\":\"Experto (Desafío Guardián)\"}")
+                                .xpReward(30)
+                                .orderIndex(3)
+                                .build(),
+                        // 4. ORDERING
+                        ActivityEntity.builder()
+                                .lesson(lesson)
+                                .type(ActivityType.ORDERING)
+                                .title("Plan Maestro de Restauración")
+                                .configurationJson("{\"instructions\":\"Ordena los pasos del plan técnico para recuperar un área degradada:\",\"steps\":[\"Diagnosticar el suelo y controlar especies invasoras dañinas\",\"Plantar especies nativas pioneras que enriquezcan la tierra\",\"Monitorear el regreso espontáneo de aves polinizadoras y fauna\"],\"correctSequence\":[0,1,2],\"difficulty\":\"Experto (Desafío Guardián)\"}")
+                                .xpReward(30)
+                                .orderIndex(4)
+                                .build(),
+                        // 5. DRAG_AND_DROP
+                        ActivityEntity.builder()
+                                .lesson(lesson)
+                                .type(ActivityType.DRAG_AND_DROP)
+                                .title("Compromisos del Guardián")
+                                .configurationJson("{\"instructions\":\"Asigna cada compromiso ecológico al espacio donde tiene su mayor impacto:\",\"targets\":[{\"zone\":\"hogar\",\"name\":\"En el hogar\"},{\"zone\":\"colegio\",\"name\":\"En el colegio o comunidad\"},{\"zone\":\"montana\",\"name\":\"En las reservas naturales\"}],\"elements\":[{\"id\":\"ahorro\",\"name\":\"Cerrar la llave y no verter aceites\"},{\"id\":\"reciclaje\",\"name\":\"Organizar brigadas de separación de residuos\"},{\"id\":\"sendero\",\"name\":\"No dejar huella ni extraer fauna y flora\"}],\"correctAnswers\":{\"ahorro\":\"hogar\",\"reciclaje\":\"colegio\",\"sendero\":\"montana\"},\"difficulty\":\"Experto (Desafío Guardián)\"}")
+                                .xpReward(30)
+                                .orderIndex(5)
+                                .build()
+                );
+            default:
+                return List.of();
+        }
     }
 
     private void seedAchievements() {
@@ -640,43 +1024,55 @@ public class DataSeeder implements CommandLineRunner {
         );
 
         for (AchievementData a : list) {
-            if (!achievementRepository.existsByCode(a.code())) {
-                achievementRepository.save(AchievementEntity.builder()
-                        .code(a.code())
-                        .title(a.title())
-                        .description(a.description())
-                        .conditionType(a.conditionType())
-                        .conditionValue(a.conditionValue())
-                        .visualKey(a.visualKey())
-                        .isActive(true)
-                        .build());
-            }
+            achievementRepository.findByCode(a.code()).ifPresentOrElse(
+                    existing -> {
+                        existing.setTitle(a.title());
+                        existing.setDescription(a.description());
+                        existing.setVisualKey(a.visualKey());
+                        achievementRepository.save(existing);
+                    },
+                    () -> achievementRepository.save(AchievementEntity.builder()
+                            .code(a.code())
+                            .title(a.title())
+                            .description(a.description())
+                            .conditionType(a.conditionType())
+                            .conditionValue(a.conditionValue())
+                            .visualKey(a.visualKey())
+                            .isActive(true)
+                            .build())
+            );
         }
     }
 
     private void seedRewards(Map<Integer, LevelEntity> levels) {
-        if (rewardRepository.count() == 0) {
-            record RewardData(String name, String description, RewardType type, String visualKey, int levelNumber) {}
+        record RewardData(String name, String description, RewardType type, String visualKey, int levelNumber) {}
 
-            List<RewardData> rewards = List.of(
-                    new RewardData("Gorra de Explorador", "Accesorio para tu avatar de campo", RewardType.ACCESSORY, "ITEM_EXPLORER_CAP", 1),
-                    new RewardData("Marco de Agua Pura", "Marco conmemorativo de corrientes hídricas", RewardType.FRAME, "ITEM_WATER_FRAME", 2),
-                    new RewardData("Avatar Guardián del Mar", "Avatar protector oceánico", RewardType.AVATAR, "ITEM_REEF_AVATAR", 3),
-                    new RewardData("Fondo de la Selva Profunda", "Fondo de perfil del Amazonas", RewardType.BACKGROUND, "ITEM_JUNGLE_BG", 4),
-                    new RewardData("Corona Solar", "Accesorio exclusivo para el defensor del planeta", RewardType.ACCESSORY, "ITEM_SUN_CROWN", 5)
+        List<RewardData> rewards = List.of(
+                new RewardData("Gorra de Explorador", "Accesorio para tu avatar de campo", RewardType.ACCESSORY, "ITEM_EXPLORER_CAP", 1),
+                new RewardData("Marco de Agua Pura", "Marco conmemorativo de corrientes hídricas", RewardType.FRAME, "ITEM_WATER_FRAME", 2),
+                new RewardData("Avatar Guardián del Mar", "Avatar protector oceánico", RewardType.AVATAR, "ITEM_REEF_AVATAR", 3),
+                new RewardData("Fondo de la Selva Profunda", "Fondo de perfil del Amazonas", RewardType.BACKGROUND, "ITEM_JUNGLE_BG", 4),
+                new RewardData("Corona Solar", "Accesorio exclusivo para el defensor del planeta", RewardType.ACCESSORY, "ITEM_SUN_CROWN", 5)
+        );
+
+        for (RewardData r : rewards) {
+            LevelEntity lvl = levels.getOrDefault(r.levelNumber(), levels.get(1));
+            rewardRepository.findByVisualKey(r.visualKey()).ifPresentOrElse(
+                    existing -> {
+                        existing.setName(r.name());
+                        existing.setDescription(r.description());
+                        existing.setRequiredLevel(lvl);
+                        rewardRepository.save(existing);
+                    },
+                    () -> rewardRepository.save(RewardEntity.builder()
+                            .name(r.name())
+                            .description(r.description())
+                            .type(r.type())
+                            .visualKey(r.visualKey())
+                            .requiredLevel(lvl)
+                            .isActive(true)
+                            .build())
             );
-
-            for (RewardData r : rewards) {
-                LevelEntity lvl = levels.getOrDefault(r.levelNumber(), levels.get(1));
-                rewardRepository.save(RewardEntity.builder()
-                        .name(r.name())
-                        .description(r.description())
-                        .type(r.type())
-                        .visualKey(r.visualKey())
-                        .requiredLevel(lvl)
-                        .isActive(true)
-                        .build());
-            }
         }
     }
 }

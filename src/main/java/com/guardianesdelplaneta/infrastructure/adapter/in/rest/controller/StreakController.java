@@ -79,6 +79,20 @@ public class StreakController {
 
     private Long getCurrentUserId() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        return Long.parseLong(auth.getName());
+        Object credentials = auth != null ? auth.getCredentials() : null;
+        if (credentials instanceof Number) {
+            return ((Number) credentials).longValue();
+        }
+        if (credentials instanceof String && !((String) credentials).isBlank()) {
+            try {
+                return Long.parseLong((String) credentials);
+            } catch (NumberFormatException ignored) {}
+        }
+        if (auth != null && auth.getName() != null) {
+            try {
+                return Long.parseLong(auth.getName());
+            } catch (NumberFormatException ignored) {}
+        }
+        return null;
     }
 }

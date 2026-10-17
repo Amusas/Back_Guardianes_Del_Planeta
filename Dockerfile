@@ -3,6 +3,9 @@
 # ==========================================
 FROM eclipse-temurin:17-jdk-alpine AS builder
 
+ENV LANG=C.UTF-8
+ENV LC_ALL=C.UTF-8
+
 WORKDIR /app
 
 # Copiar archivos de configuración de Gradle para aprovechar la caché de Docker
@@ -21,6 +24,9 @@ RUN ./gradlew bootJar --no-daemon -x test
 # ==========================================
 FROM eclipse-temurin:17-jre-alpine AS runner
 
+ENV LANG=C.UTF-8
+ENV LC_ALL=C.UTF-8
+
 WORKDIR /app
 
 # Crear un usuario no privilegiado por seguridad
@@ -36,7 +42,7 @@ USER appuser
 # Puerto por defecto del backend
 EXPOSE 8080
 
-# Opciones de JVM adaptadas a contenedores
-ENV JAVA_OPTS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"
+# Opciones de JVM adaptadas a contenedores con UTF-8
+ENV JAVA_OPTS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -Dfile.encoding=UTF-8"
 
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]

@@ -40,6 +40,21 @@ class LessonControllerTest {
     @MockBean
     private LessonRestMapper lessonRestMapper;
 
+    @MockBean
+    private com.guardianesdelplaneta.domain.port.in.GetActivitiesUseCase getActivitiesUseCase;
+
+    @MockBean
+    private com.guardianesdelplaneta.infrastructure.adapter.in.rest.mapper.ActivityRestMapper activityRestMapper;
+
+    @MockBean
+    private com.guardianesdelplaneta.domain.port.in.CompleteLessonUseCase completeLessonUseCase;
+
+    @MockBean
+    private com.guardianesdelplaneta.domain.port.in.GetChildProgressUseCase getChildProgressUseCase;
+
+    @MockBean
+    private com.guardianesdelplaneta.infrastructure.adapter.in.rest.mapper.ProgressRestMapper progressRestMapper;
+
     @Test
     void getActiveLessons_ReturnsListOfLessons() throws Exception {
         Lesson lessonMock = mock(Lesson.class);
@@ -65,5 +80,41 @@ class LessonControllerTest {
         mockMvc.perform(get("/api/v1/lessons/1")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void completeLesson_ReturnsProgress() throws Exception {
+        com.guardianesdelplaneta.domain.model.Progress progressMock = mock(com.guardianesdelplaneta.domain.model.Progress.class);
+        com.guardianesdelplaneta.infrastructure.adapter.in.rest.dto.ProgressResponseDto progressDtoMock =
+                new com.guardianesdelplaneta.infrastructure.adapter.in.rest.dto.ProgressResponseDto(
+                        1L, 10L, 5L, com.guardianesdelplaneta.domain.model.enums.ProgressStatus.COMPLETED, 100, null, null);
+
+        when(completeLessonUseCase.completeLesson(any(), any())).thenReturn(progressMock);
+        when(progressRestMapper.toResponseDto(any())).thenReturn(progressDtoMock);
+
+        org.springframework.security.core.Authentication auth =
+                new org.springframework.security.authentication.UsernamePasswordAuthenticationToken("childUser", 10L, List.of());
+
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/api/v1/lessons/5/complete")
+                .principal(auth)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("COMPLETED"));
+    }
+
+    @Test
+    void getMyCompletedLessons_ReturnsListOfIds() throws Exception {
+        when(getChildProgressUseCase.getCompletedLessonIdsByUserId(any())).thenReturn(List.of(5L, 6L));
+
+        org.springframework.security.core.Authentication auth =
+                new org.springframework.security.authentication.UsernamePasswordAuthenticationToken("childUser", 10L, List.of());
+
+        mockMvc.perform(get("/api/v1/lessons/progress/me")
+                .principal(auth)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$[0]").value(5))
+                .andExpect(jsonPath("$[1]").value(6));
     }
 }

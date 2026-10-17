@@ -5,6 +5,5 @@ public enum ActivityType {
     TRUE_FALSE,
     CLASSIFICATION,
     ORDERING,
-    IDENTIFICATION,
     DRAG_AND_DROP
 }

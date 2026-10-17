@@ -1,38 +1,61 @@
 package com.guardianesdelplaneta.infrastructure.adapter.out.persistence;
 
+import com.guardianesdelplaneta.domain.model.Lesson;
+import com.guardianesdelplaneta.infrastructure.adapter.out.persistence.entity.LessonEntity;
+import com.guardianesdelplaneta.infrastructure.adapter.out.persistence.mapper.LessonPersistenceMapper;
+import com.guardianesdelplaneta.infrastructure.adapter.out.persistence.repository.LessonRepository;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.MySQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@SpringBootTest
-@Testcontainers
-public class LessonPersistenceAdapterTest {
+import java.util.List;
+import java.util.Optional;
 
-    @Container
-    static MySQLContainer<?> mysql = new MySQLContainer<>("mysql:8.0")
-            .withDatabaseName("testdb")
-            .withUsername("test")
-            .withPassword("test");
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-    @DynamicPropertySource
-    static void properties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", mysql::getJdbcUrl);
-        registry.add("spring.datasource.username", mysql::getUsername);
-        registry.add("spring.datasource.password", mysql::getPassword);
-        registry.add("spring.jpa.hibernate.ddl-auto", () -> "create-drop");
-    }
+@ExtendWith(MockitoExtension.class)
+class LessonPersistenceAdapterTest {
 
-    @Autowired
+    @Mock
+    private LessonRepository repository;
+
+    @Mock
+    private LessonPersistenceMapper mapper;
+
+    @InjectMocks
     private LessonPersistenceAdapter adapter;
 
     @Test
-    void testContextLoads() {
-        assertNotNull(adapter);
+    @DisplayName("findActiveLessonsByEcosystemId debe retornar lecciones activas ordenadas")
+    void findActiveLessonsByEcosystemId_Success() {
+        LessonEntity entity = new LessonEntity();
+        Lesson domain = new Lesson();
+        domain.setId(1L);
+        domain.setEcosystemId(2L);
+        when(repository.findByEcosystemIdAndIsActiveTrueOrderByOrderIndexAsc(2L)).thenReturn(List.of(entity));
+        when(mapper.toDomain(entity)).thenReturn(domain);
+
+        List<Lesson> result = adapter.findActiveLessonsByEcosystemId(2L);
+
+        assertEquals(1, result.size());
+        assertEquals(2L, result.get(0).getEcosystemId());
+    }
+
+    @Test
+    @DisplayName("findById debe retornar lección cuando existe y vacío cuando no")
+    void findById_HappyAndSadPath() {
+        LessonEntity entity = new LessonEntity();
+        Lesson domain = new Lesson();
+        domain.setId(1L);
+        when(repository.findById(1L)).thenReturn(Optional.of(entity));
+        when(mapper.toDomain(entity)).thenReturn(domain);
+        when(repository.findById(99L)).thenReturn(Optional.empty());
+
+        assertTrue(adapter.findById(1L).isPresent());
+        assertTrue(adapter.findById(99L).isEmpty());
     }
 }

@@ -1,38 +1,56 @@
 package com.guardianesdelplaneta.infrastructure.adapter.out.persistence;
 
+import com.guardianesdelplaneta.domain.model.XPTransaction;
+import com.guardianesdelplaneta.domain.model.enums.XPTransactionType;
+import com.guardianesdelplaneta.infrastructure.adapter.out.persistence.entity.XPTransactionEntity;
+import com.guardianesdelplaneta.infrastructure.adapter.out.persistence.mapper.XPTransactionPersistenceMapper;
+import com.guardianesdelplaneta.infrastructure.adapter.out.persistence.repository.XPTransactionRepository;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.MySQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@SpringBootTest
-@Testcontainers
-public class XPTransactionPersistenceAdapterTest {
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-    @Container
-    static MySQLContainer<?> mysql = new MySQLContainer<>("mysql:8.0")
-            .withDatabaseName("testdb")
-            .withUsername("test")
-            .withPassword("test");
+@ExtendWith(MockitoExtension.class)
+class XPTransactionPersistenceAdapterTest {
 
-    @DynamicPropertySource
-    static void properties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", mysql::getJdbcUrl);
-        registry.add("spring.datasource.username", mysql::getUsername);
-        registry.add("spring.datasource.password", mysql::getPassword);
-        registry.add("spring.jpa.hibernate.ddl-auto", () -> "create-drop");
-    }
+    @Mock
+    private XPTransactionRepository repository;
 
-    @Autowired
+    @Mock
+    private XPTransactionPersistenceMapper mapper;
+
+    @InjectMocks
     private XPTransactionPersistenceAdapter adapter;
 
     @Test
-    void testContextLoads() {
-        assertNotNull(adapter);
+    @DisplayName("save debe persistir y retornar la transacción de XP")
+    void save_Success() {
+        XPTransaction domain = new XPTransaction();
+        domain.setId(1L);
+        domain.setAmount(25);
+        XPTransactionEntity entity = new XPTransactionEntity();
+        when(mapper.toEntity(domain)).thenReturn(entity);
+        when(repository.save(entity)).thenReturn(entity);
+        when(mapper.toDomain(entity)).thenReturn(domain);
+
+        XPTransaction saved = adapter.save(domain);
+
+        assertNotNull(saved);
+        assertEquals(25, saved.getAmount());
+    }
+
+    @Test
+    @DisplayName("existsByChildIdAndTypeAndReferenceId debe retornar true o false")
+    void existsByChildIdAndTypeAndReferenceId_Success() {
+        when(repository.existsByChildIdAndTypeAndReferenceId(10L, XPTransactionType.ACTIVITY, 5L)).thenReturn(true);
+        when(repository.existsByChildIdAndTypeAndReferenceId(10L, XPTransactionType.LESSON, 99L)).thenReturn(false);
+
+        assertTrue(adapter.existsByChildIdAndTypeAndReferenceId(10L, XPTransactionType.ACTIVITY, 5L));
+        assertFalse(adapter.existsByChildIdAndTypeAndReferenceId(10L, XPTransactionType.LESSON, 99L));
     }
 }

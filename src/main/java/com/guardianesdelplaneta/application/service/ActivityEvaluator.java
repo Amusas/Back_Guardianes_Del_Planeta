@@ -18,7 +18,7 @@ public class ActivityEvaluator {
         try {
             JsonNode config = mapper.readTree(activity.getConfigurationJson());
             return switch (activity.getType()) {
-                case MULTIPLE_CHOICE, TRUE_FALSE, IDENTIFICATION -> {
+                case MULTIPLE_CHOICE, TRUE_FALSE -> {
                     if (config.has("correctAnswer") && response.has("answer")) {
                         yield config.get("correctAnswer").equals(response.get("answer"));
                     }
